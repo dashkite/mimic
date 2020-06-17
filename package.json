@@ -1,6 +1,6 @@
 {
   "name": "@dashkite/mimic",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Katana combinators for running headless browser tests with Puppeteer",
   "main": "build/npm/src/index.js",
   "scripts": {
