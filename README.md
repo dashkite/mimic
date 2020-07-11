@@ -3,6 +3,9 @@
 Katana combinators for running headless browser tests with Puppeteer.
 
 ```coffeescript
+import { page, defined, select, shadow, type, submit, waitFor, Metal as $ }
+  from "@dashkite/mimic"
+
 flow [
   wrap [ puppeteer.launch() ]
   page "http://localhost:3000"
