@@ -1,23 +1,35 @@
-import {wrap, arity, flip, curry, flow} from "@pandastrike/garden"
+import puppeteer from "puppeteer"
+import locateChrome from "locate-chrome"
+import * as _ from "@dashkite/joy"
 import * as k from "@dashkite/katana"
 
-import assert from "assert"
+# capitalized because we export assert
+import Assert from "assert/strict"
 
+isNode = (node) -> node?.$?
+nodeOrPage = k.test (_.negate isNode), k.read "page"
 
-_browser = (puppeteer) -> puppeteer.launch()
+# TODO optimized for using global Chrome
+#      if we switch back to using local Chrome
+#      we don't need to create an incognito
+#      instance and we would call close instead
+#      of disconnect / see #3
+connect = _.flow [
+  locateChrome
+  (path) -> puppeteer.launch executablePath: path
+]
 
-browser = (puppeteer) ->
-  flow [
-    wrap [ puppeteer, {} ]
-    k.poke _browser
-    k.write "browser"
-    k.discard
+disconnect = (browser) -> browser.disconnect()
+
+launch = (browser, actions) ->
+  _.flow [
+    -> { browser }
+    actions...
   ]
 
-browser._ = _browser
-
-_page = curry (browser) ->
+_page = (browser) ->
   do ({page} = {}) ->
+    # console.log {browser}
     page = await browser.newPage()
     page.on "console", (message) ->
       console.log "<#{page.url()}>", message.text()
@@ -25,31 +37,33 @@ _page = curry (browser) ->
       console.error "<#{page.url()}>", error
     page
 
-page = flow [
+page = k.assign [
   k.read "browser"
   k.poke _page
   k.write "page"
-  k.discard
 ]
 
 page._ = _page
 
 
-_goto = curry (url, page) -> page.goto url
+_goto = _.curry (url, page) -> page.goto url
 
 goto = (url) ->
-  flow [
+  _.flow [
     k.read "page"
     k.pop _goto url
   ]
 
 goto._ = _goto
 
+sleep = (ms) -> k.peek -> new Promise (resolve) -> setTimeout resolve, ms
 
-_screenshot = curry (options, page) -> page.screenshot options
+pause = sleep 100
+
+_screenshot = _.curry (options, page) -> page.screenshot options
 
 screenshot = (options) ->
-  flow [
+  _.flow [
     k.read "page"
     k.pop _screenshot options
   ]
@@ -57,71 +71,59 @@ screenshot = (options) ->
 screenshot._ = _screenshot
 
 
-_script = curry (options, page) -> page.addScriptTag options
+_script = _.curry (options, page) -> page.addScriptTag options
 
 script = (options) ->
-  flow [
+  _.flow [
     k.read "page"
     k.pop _script options
   ]
 
 script._ = _script
 
-
-_defined = curry (name, page) ->
+_defined = _.curry (name, page) ->
   page.evaluate ((name) -> customElements.whenDefined name), name
 
 defined = (name) ->
-  flow [
+  _.flow [
     k.read "page"
     k.pop _defined name
   ]
 
 defined._ = _defined
 
+_content = (page) -> page.content()
 
-_getHTML = (page) -> page.content()
-
-getHTML = flow [
+content = _.flow [
   k.read "page"
-  k.poke _getHTML
+  k.poke _content
 ]
 
-getHTML._ = _getHTML
+content._ = _content
 
+_setContent = _.curry (html, page) -> page.setContent html
 
-_setHTML = curry (html, page) -> page.setContent html
-
-setHTML = (html) ->
-  flow [
+setContent = (html) ->
+  _.flow [
     k.read "page"
-    k.pop _setHTML html
+    k.pop _setContent html
   ]
 
-setHTML._ = _setHTML
+setContent._ = _setContent
 
+_render = _.curry (html, node) ->
+  node.evaluate ((node, html) -> node.innerHTML = html), html
 
-# TODO generalize this for any node?
-_render = curry (html, page) ->
-  page.evaluate ((html) -> document.body.innerHTML = html), html
-
-render = (html) ->
-  flow [
-    k.read "page"
-    k.pop _render html
-  ]
+render = (html) -> k.peek _render html
 
 render._ = _render
 
-
-_select = curry (selector, node) -> node.$ selector
+_select = _.curry (selector, node) -> node.$ selector
 
 select = (selector) ->
-  flow [
-    k.branch [
-      [ ((node) -> node.$?), k.push _select selector ]
-      [ (wrap true), flow [ (k.read "page"), k.poke _select selector ] ]
-    ]
+  _.flow [
+    nodeOrPage
+    k.push _select selector
   ]
 
 select._ = _select
@@ -132,84 +134,39 @@ shadow = k.push _shadow
 
 shadow._ = _shadow
 
-
-sleep = (ms) -> k.peek -> new Promise (resolve) -> setTimeout resolve, ms
-
-pause = sleep 100
-
-
-_evaluate = curry (f, node) -> node.evaluate f
+_evaluate = _.curry (f, node) -> node.evaluate f
 
 evaluate = (f) ->
-  flow [
-    k.branch [
-      [ ((node) -> node.evaluate?), k.push _evaluate f ]
-      [ (wrap true), flow [ (k.read "page"), k.poke _evaluate f ] ]
-    ]
+  _.flow [
+    nodeOrPage
+    k.push _evaluate f
   ]
 
 evaluate._ = _evaluate
 
-
-_push = curry ({state, title, url}, page) ->
-  f = (url) -> history.pushState {}, "", url
-  page.evaluate f, url
-
-push = (options) ->
-  flow [
-    k.read "page"
-    k.pop _push options
-  ]
-
-push._ = _push
+innerHTML = evaluate (body) -> body.innerHTML
 
 
-_waitFor = curry (check, page, node) ->
-  if check.constructor == String
-    handle = await page.waitForSelector check
-  else
-    handle = await page.waitForFunction check, {}, node
-
-waitFor = (check) ->
-  flow [
-    k.read "page"
-    k.poke _waitFor check
-  ]
-
-waitFor._ = _waitFor
-
-
-_equal = curry (expected, actual) ->
-  if actual.jsonValue?
-    actual = await actual.jsonValue()
-  assert.equal expected, actual
-
-equal = (expected) -> k.pop _equal expected
-
-equal._ = _equal
-
-
-clear = flow [
-  evaluate (node) -> node.value = ""
-  k.discard
-]
-
-
-
-
-_type = curry (text, node) -> node.type text
+_type = _.curry (text, node) -> node.type text
 
 type = (text) -> k.peek _type text
 
 type._ = _type
 
-
-_press = curry (text, node) -> node.press text
+_press = _.curry (text, node) -> node.press text
 
 press = (text) -> k.pop _press text
 
 press._ = _press
 
+
+value = _.flow [
+  evaluate (node) -> node.value
+]
+
+clear = _.flow [
+  evaluate (node) -> node.value = ""
+]
 
 _click = (node) -> node.click()
 
@@ -225,19 +182,69 @@ submit = k.pop _submit
 submit._ = _submit
 
 
+_waitFor = _.curry (check, page, node) ->
+  if check.constructor == String
+    handle = await page.waitForSelector check
+  else
+    handle = await page.waitForFunction check, {}, node
+
+waitFor = (check) ->
+  _.flow [
+    k.read "page"
+    k.poke _waitFor check
+  ]
+
+waitFor._ = _waitFor
+
+
+_push = _.curry ({state, title, url}, page) ->
+  f = (url) -> history.pushState {}, "", url
+  page.evaluate f, url
+
+push = (options) ->
+  _.flow [
+    k.read "page"
+    k.pop _push options
+  ]
+
+push._ = _push
+
+isAny = (x) -> true
+isJSONValue = (x) -> x.jsonValue?
+
+_assert = _.generic
+  name: "mimic assert"
+  default: (expected, actual) -> Assert.equal actual, expected
+
+_.generic _assert, isAny, isJSONValue,
+  (expected, actual) -> Assert.equal actual.jsonValue(), expected
+
+_.generic _assert, _.isString, _.isString,
+  (expected, actual) -> Assert.equal (_.trim actual), expected
+
+_.generic _assert, _.isFunction, isAny,
+  (expected, actual) -> Assert.equal true, expected actual
+
+_assert = _.curry _.binary _assert
+
+assert = (expected) -> k.pop _assert expected
+
+assert._ = _assert
+
 export {
-  browser
+  connect
+  disconnect
+  launch
   page
 
   goto
-  push
 
   sleep
   pause
   screenshot
 
-  getHTML
-  setHTML
+  content
+  setContent
   render
   script
 
@@ -245,14 +252,17 @@ export {
   defined
   shadow
 
-  clear
   type
   press
+  value
+  clear
   click
   submit
 
   evaluate
+  innerHTML
   waitFor
+  push
 
-  equal
+  assert
 }

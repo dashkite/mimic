@@ -2,29 +2,44 @@
   "name": "@dashkite/mimic",
   "version": "0.1.0",
   "description": "Katana combinators for running headless browser tests with Puppeteer",
-  "main": "build/src/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "keywords": [],
+  "homepage": "https://github.com/dashkite/mimic#readme",
+  "bugs": {
+    "url": "https://github.com/dashkite/mimic/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dashkite/mimic.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/dashkite/mimic/issues"
+  "license": "SEE LICENSE IN LICENSE.md",
+  "author": "Dan Yoder",
+  "exports": {
+    ".": {
+      "node": "./build/node/src/index.js"
+    }
   },
-  "homepage": "https://github.com/dashkite/mimic#readme",
-  "devDependencies": {
-    "@dashkite/brick": "^0.1.0",
-    "@dashkite/genie": "0.0.1",
-    "coffeescript": "^2.5.1",
-    "panda-quill": "^5.0.0"
+  "main": "./build/node/src/index.js",
+  "files": [
+    "./build/node/src"
+  ],
+  "scripts": {
+    "test": "genie test"
   },
   "dependencies": {
-    "@dashkite/katana": "^0.3.0",
-    "@pandastrike/garden": "^8.0.0-alpha.1"
+    "@dashkite/katana": "^0.4.7",
+    "locate-chrome": "^0.1.1",
+    "puppeteer": "^9.1.1"
+  },
+  "devDependencies": {
+    "@dashkite/genie": "^0.3.3",
+    "@dashkite/genie-presets": "^0.1.5",
+    "@dashkite/masonry": "^0.10.3",
+    "amen": "^3.0.0",
+    "coffeescript": "^2.5.1",
+    "express": "^4.17.1",
+    "express-static": "^1.2.6",
+    "fs-monkey": "^1.0.3",
+    "memfs": "^3.2.2",
+    "unionfs": "^4.4.0"
   }
 }
