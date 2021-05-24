@@ -1,10 +1,6 @@
 import assert from "assert/strict"
 import * as a from "amen"
 
-import fs from "fs"
-import { patchFs as patchFS } from "fs-monkey"
-import { vol as vfs } from "memfs"
-import { ufs } from "unionfs"
 import express from "express"
 import files from "express-static"
 import * as _ from "@dashkite/joy"
@@ -13,27 +9,7 @@ import * as k from "@dashkite/katana"
 # module under test
 import * as $ from "../src"
 
-vfs.fromJSON
-  "/app/index.html": """
-    <html>
-      <body>Hello, world!</body>
-    </html>
-    """
-
-ufs
-  .use fs
-  .use vfs
-
-patchFS ufs
-
-
 do ->
-
-  server = express()
-    .use files "/app"
-    .listen()
-
-  {port} = server.address()
 
   browser = await $.connect()
 
@@ -44,10 +20,10 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.select "body"
         $.innerHTML
-        $.assert "Hello, world!"
+        $.assert ""
       ]
 
     a.test
@@ -55,7 +31,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.script content: "window.greeting = 'Hello, world!'"
         $.pause
         $.evaluate -> window.greeting
@@ -67,7 +43,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.content
         $.assert (actual) -> actual.startsWith "<html>"
       ]
@@ -77,7 +53,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.setContent """
           <html>
             <body>Hello?</body>
@@ -94,7 +70,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.select "body"
         $.render "Hola, todo el mundo!"
         $.innerHTML
@@ -106,7 +82,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.script content: """
           class Foo extends HTMLElement {
             constructor() {
@@ -135,7 +111,7 @@ do ->
       wait: false
       $.launch browser, [
         $.page
-        $.goto "http://localhost:#{port}/"
+        $.goto "about:blank"
         $.select "body"
         $.render """
           <form>
@@ -156,6 +132,5 @@ do ->
   ]
 
   await $.disconnect browser
-  server.close()
 
   process.exit 0
