@@ -16,10 +16,11 @@ nodeOrPage = k.test (_.negate isNode), k.read "page"
 #      of disconnect / see #3
 connect = _.flow [
   locateChrome
-  (path) -> puppeteer.launch executablePath: path
+  (path) -> puppeteer.launch
+    executablePath: path
 ]
 
-disconnect = (browser) -> browser.disconnect()
+disconnect = (browser) -> browser.close()
 
 launch = (browser, actions) ->
   _.flow [
