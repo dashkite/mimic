@@ -26,14 +26,14 @@
     "test": "genie test"
   },
   "dependencies": {
-    "@dashkite/katana": "^0.4.7",
+    "@dashkite/katana": "^0.4.8",
     "locate-chrome": "^0.1.1",
     "puppeteer": "^9.1.1"
   },
   "devDependencies": {
-    "@dashkite/genie": "^0.4.0",
-    "@dashkite/genie-presets": "^0.1.7",
-    "@dashkite/masonry": "^0.10.4",
+    "@dashkite/genie": "^0.4.1",
+    "@dashkite/genie-presets": "^0.1.13",
+    "@dashkite/masonry": "^0.10.8",
     "amen": "^3.0.0",
     "coffeescript": "^2.5.1",
     "express": "^4.17.1",
