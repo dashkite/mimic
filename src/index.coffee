@@ -112,8 +112,17 @@ setContent = (html) ->
 
 setContent._ = _setContent
 
+__render = (node, html) ->
+  if node.innerHTML?
+    node.innerHTML = html
+  else
+    throw new Error "mimic: attempt to render to a non-element"
+
 _render = _.curry (html, node) ->
-  node.evaluate ((node, html) -> node.innerHTML = html), html
+  if node?.evaluate?
+    node.evaluate __render, html
+  else
+    throw new Error "mimic: attempt to render to a non-element"
 
 render = (html) -> k.peek _render html
 
@@ -145,12 +154,13 @@ evaluate = (f) ->
 
 evaluate._ = _evaluate
 
-innerHTML = evaluate (body) -> body.innerHTML
+innerHTML = html = evaluate (node) -> node.innerHTML
 
+text = evaluate (node) -> node.textContent
 
 _type = _.curry (text, node) -> node.type text
 
-type = (text) -> k.peek _type text
+type = (text) -> k.pop _type text
 
 type._ = _type
 
@@ -161,12 +171,11 @@ press = (text) -> k.pop _press text
 press._ = _press
 
 
-value = _.flow [
-  evaluate (node) -> node.value
-]
+value = evaluate (node) -> node.value
 
 clear = _.flow [
   evaluate (node) -> node.value = ""
+  k.discard
 ]
 
 _click = (node) -> node.click()
@@ -262,6 +271,8 @@ export {
 
   evaluate
   innerHTML
+  html
+  text
   waitFor
   push
 

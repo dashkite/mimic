@@ -121,7 +121,7 @@ do ->
         $.pause
         $.select "input"
         $.type "Hello, world!"
-        # $.select "input"
+        $.select "input"
         $.value
         $.assert "Hello, world!"
       ]
