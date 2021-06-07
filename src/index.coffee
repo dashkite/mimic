@@ -192,11 +192,12 @@ submit = k.pop _submit
 submit._ = _submit
 
 
-_waitFor = _.curry (check, page, node) ->
-  if check.constructor == String
-    handle = await page.waitForSelector check
-  else
-    handle = await page.waitForFunction check, {}, node
+_waitFor = (check) ->
+  (page, node) ->
+    if check.constructor == String
+      handle = await page.waitForSelector check
+    else
+      handle = await page.waitForFunction check, {}, node
 
 waitFor = (check) ->
   _.flow [
