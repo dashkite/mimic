@@ -32,8 +32,8 @@
   },
   "devDependencies": {
     "@dashkite/genie": "^0.5.2",
-    "@dashkite/genie-presets": "^0.2.3",
-    "@dashkite/masonry": "^0.11.5",
+    "@dashkite/genie-presets": "^0.2.5",
+    "@dashkite/masonry": "^0.11.6",
     "amen": "^3.0.0",
     "coffeescript": "^2.5.1",
     "express": "^4.17.1",
