@@ -38,7 +38,7 @@ _page = (browser) ->
       console.error "<#{page.url()}>", error
     page
 
-page = k.assign [
+page = _.flow [
   k.read "browser"
   k.poke _page
   k.write "page"
@@ -195,18 +195,16 @@ submit._ = _submit
 _waitFor = (check) ->
   (page, node) ->
     if check.constructor == String
-      handle = await page.waitForSelector check
+      page.waitForSelector check
     else
-      handle = await page.waitForFunction check, {}, node
+      # TODO check type of node to make sure it's a not a JSHandle
+      page.waitForFunction check #, {}, node
 
 waitFor = (check) ->
   _.flow [
     k.read "page"
     k.poke _waitFor check
   ]
-
-waitFor._ = _waitFor
-
 
 _push = _.curry ({state, title, url}, page) ->
   f = (url) -> history.pushState {}, "", url
