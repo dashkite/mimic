@@ -25,18 +25,17 @@
   "scripts": {
     "test": "genie test"
   },
-  "dependencies": {
-    "@dashkite/katana": "^0.4.8",
-    "locate-chrome": "^0.1.1",
-    "puppeteer": "^10.2.0"
-  },
   "devDependencies": {
-    "@dashkite/genie": "^0.5.4",
-    "@dashkite/genie-presets": "^0.4.13",
-    "@dashkite/masonry": "^0.11.11",
-    "amen": "^3.0.0",
-    "coffeescript": "^2.5.1",
-    "express": "^4.17.1",
-    "express-static": "^1.2.6"
+    "@dashkite/amen": "^0.2.0",
+    "@dashkite/amen-console": "^0.0.2",
+    "@dashkite/assert": "^0.1.4",
+    "@dashkite/genie": "link:../genie",
+    "@dashkite/genie-clean": "link:../genie-clean",
+    "@dashkite/genie-coffee": "link:../genie-coffee",
+    "@dashkite/genie-yaml": "link:../genie-yaml"
+  },
+  "dependencies": {
+    "@dashkite/joy": "link:../joy",
+    "@dashkite/katana": "^0.4.8"
   }
 }
