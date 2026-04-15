@@ -1,92 +1,62 @@
 # Mimic
 
-Katana combinators for running headless browser tests with Puppeteer.
+*Katana combinators for running headless browser tests with Puppeteer.*
+
+[![Hippocratic License HL3-CORE](https://img.shields.io/static/v1?label=Hippocratic%20License&message=HL3-CORE&labelColor=5e2751&color=bc8c3d)](https://firstdonoharm.dev/version/3/0/core.html)
+
+Mimic provides a set of stack-based combinators, powered by Katana, for orchestrating browser interactions using Puppeteer. It enables clear, declarative browser automation and testing by treating the browser session as a composable flow of operations.
 
 ```coffeescript
-import { page, defined, select, shadow, type, submit, waitFor, Metal as $ }
-  from "@dashkite/mimic"
+import { pipe } from "@dashkite/joy/function"
+import Mimic from "@dashkite/mimic"
 
-flow [
-  wrap [ puppeteer.launch() ]
-  page "http://localhost:3000"
-  tee flow [
-    defined "x-register"
-    select "x-register"
-    shadow
-    select "input[name='nickname']"
-    type faker.internet.userName()
-    select "form"
-    submit
-  ]
-  defined "x-messages"
-  select "x-messages"
-  poke $.shadow
-  poke $.select ".container"
-  waitFor (container) ->
-    if container.textContent.trim() != ""
-      container.textContent
-  equal "Registration succeeded"
+await pipe [
+  Mimic.start browser
+  Mimic.context
+  Mimic.page
+  Mimic.goto "https://example.com"
+  Mimic.select "h1"
+  Mimic.text
+  ( stack ) -> assert.equal stack[0][0], "Example Domain"
 ]
 ```
 
-# Installation
+### Features
+- **Stack-Based Composition**: Leverage Katana to build readable browser interaction pipelines.
+- **Web Component Support**: Built-in support for Shadow DOM traversal and waiting for custom element definitions.
+- **Declarative API**: Unified interface for navigation, selection, inspection, and interaction.
+- **Puppeteer Powered**: Reliability and performance of the industry-standard headless browser library.
 
-Bundle using your favorite bundler:
+## Installation
 
+Install via your favorite package manager:
+
+```bash
+pnpm add @dashkite/mimic
 ```
-npm i @dashkite/mimic
+
+## Usage
+
+Mimic combinators are asynchronous and designed to be used within a Katana-compatible pipeline. They typically operate on a stack containing browser instances, contexts, pages, and element handles.
+
+```coffeescript
+import Mimic from "@dashkite/mimic"
+
+# Example: Submitting a login form
+await pipe [
+  Mimic.start browser
+  Mimic.page
+  Mimic.goto "/login"
+  Mimic.select "input[name='username']"
+  Mimic.type "alice"
+  Mimic.select "form"
+  Mimic.submit
+]
 ```
 
-# API
+## Other Resources
+- [Reference](./docs/reference.md): Detailed API documentation for all combinators.
+- [Recipes](./docs/recipes.md): Task-based scenarios for common browser automation patterns.
 
-## `page url`
-
-Navigate to the given URL. Places the resulting page on the stack.
-
-## `defined name`
-
-Wait until the custom element corresponding to the given name is defined.
-
-## `render html`
-
-Set the `innerHTML` of the element at the top of the stack to given HTML.
-
-## `select selector`
-
-Selects and pushes an element matching the given selector.
-
-## `shadow`
-
-Pushes the `shadowRoot` for the node at the top of the stack.
-
-## `sleep ms`
-
-Sleep for the given duration in milliseconds.
-
-## `pause`
-
-Sleep for 1 second.
-
-## `clear`
-
-Clears the `value` of the element at the top of the stack.
-
-## `type text`
-
-Simulates typing the given text into the form element at the top of the stack.
-
-## `submit`
-
-Calls `requestSubmit` on the form element at the top of the stack.
-
-## `evaluate fn`
-
-Given a page at the top of the stack, evaluates the given function in browser context. The function may take the node as an argument.
-
-## `waitFor condition`
-
-Given a page at the top of the stack, evaluates the given function in browser context until it returns a truthy value. The function may take the node as an argument. Any return value is automatically serialized and pushed onto the stack.
-
-## `equal expected`
-
-Given a value at the top of the stack, calls `assert.equal` with the given and expected values.
+## Status
+This software is currently in active development and is not yet suitable for production use. Please report bugs or request features via the repository's issue tracker.

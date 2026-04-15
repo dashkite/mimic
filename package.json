@@ -27,16 +27,17 @@
     "build": "genie build"
   },
   "devDependencies": {
-    "@dashkite/amen": "^0.2.2",
-    "@dashkite/amen-console": "^0.0.2",
+    "@dashkite/amen": "^0.9.14",
+    "@dashkite/amen-console": "^0.4.0",
     "@dashkite/assert": "^0.1.4",
-    "@dashkite/genie": "link:../genie",
-    "@dashkite/genie-clean": "link:../genie-clean",
-    "@dashkite/genie-coffee": "link:../genie-coffee",
-    "@dashkite/genie-yaml": "link:../genie-yaml"
+    "@dashkite/genie": "^0.20.14",
+    "@dashkite/genie-clean": "^0.9.0",
+    "@dashkite/genie-coffee": "^0.9.0",
+    "@dashkite/genie-module": "link:../genie-module",
+    "@dashkite/genie-yaml": "^0.11.13"
   },
   "dependencies": {
-    "@dashkite/joy": "link:../joy",
-    "@dashkite/katana": "^0.4.8"
+    "@dashkite/joy": "^0.12.25",
+    "@dashkite/katana": "link:../katana"
   }
 }
