@@ -18,7 +18,7 @@ Mimic =
   # - Combinators that transform context use K.push
   # - Combinators that interact with context use K.peek
 
-  browser: ( options ) -> [ await puppeteer.launch options ]
+  browser: ( options ) -> -> [ await puppeteer.launch options ]
   context: K.push ( browser ) -> browser.createBrowserContext()
   page: K.push ( context ) -> context.newPage()
 
@@ -37,16 +37,16 @@ Mimic =
 
   # Clock (Peek)
   clock:
-    tick: ( ms ) -> K.peek ( page ) -> _.tick page, ms
+    tick: ( ms ) -> K.peek ( page ) -> _.clock.tick page, ms
 
   # Storage (Peek)
   storage:
-    clear: K.peek ( page ) -> _.clearStorage page
+    clear: K.peek ( page ) -> _.storage.clear page
 
   # Dialog (Peek)
   dialog:
-    accept: K.peek ( page ) -> _.acceptDialog page
-    dismiss: K.peek ( page ) -> _.dismissDialog page
+    accept: K.peek ( page ) -> _.dialog.accept page
+    dismiss: K.peek ( page ) -> _.dialog.dismiss page
 
   # Emulation (Peek)
   viewport: ( options ) -> K.peek ( page ) -> _.viewport page, ( resolve options )
@@ -57,8 +57,8 @@ Mimic =
 
   # Cookies (Push/Peek)
   cookies:
-    get: K.push ( target ) -> _.getCookies target
-    set: ( cookies ) -> K.peek ( target ) -> _.setCookies target, cookies
+    get: K.push ( target ) -> _.cookies.get target
+    set: ( cookies ) -> K.peek ( target ) -> _.cookies.set target, cookies
 
   # Navigation (Peek)
   reload: ( options ) -> K.peek ( page ) -> _.reload page, options
@@ -106,7 +106,7 @@ Mimic =
 
   # Screenshot (Peek)
   screenshot:
-    image: ( options = {} ) -> K.peek ( target ) -> _.screenshot target, options
-    pdf: ( options = {} ) -> K.peek ( page ) -> _.pdf page, options
+    image: ( options = {} ) -> K.peek ( target ) -> _.screenshot.image target, options
+    pdf: ( options = {} ) -> K.peek ( page ) -> _.screenshot.pdf page, options
 
 export default Mimic

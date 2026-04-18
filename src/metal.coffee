@@ -56,6 +56,8 @@ shadow.define [ ElementHandle ], ( element ) ->
       Ensure the component has initialized and attached its shadow DOM."
   root
 
+shadow.define [ Array ], ( elements ) -> shadow elements[0]
+
 # type
 export type = Generic.make
   name: "Mimic.type"
@@ -70,6 +72,8 @@ type.define [ ElementHandle, String ], ( element, text ) ->
   await element.evaluate ( node ) -> node.value = ""
   element.type text
 
+type.define [ Array, String ], ( elements, text ) -> type elements[0], text
+
 # click
 export click = Generic.make
   name: "Mimic.click"
@@ -81,6 +85,8 @@ export click = Generic.make
 click.define [ ElementHandle ], ( element ) -> 
   element.click()
 
+click.define [ Array ], ( elements ) -> click elements[0]
+
 # attribute
 export attribute = Generic.make
   name: "Mimic.attribute"
@@ -90,6 +96,9 @@ export attribute = Generic.make
 
 attribute.define [ ElementHandle, String ], ( element, name ) ->
   element.evaluate ( ( node, name ) -> node.getAttribute name ), name
+
+attribute.define [ Array, String ], ( elements, name ) ->
+  attribute elements[0], name
 
 # evaluate
 export evaluate = Generic.make
@@ -207,8 +216,8 @@ export media = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
 media.define [ Page, String, Array ], ( page, type, features ) ->
-  await page.emulateMediaType type if type?
-  page.emulateMediaFeatures features if features?
+  if type? then await page.emulateMediaType type
+  if features? then await page.emulateMediaFeatures features
 
 # navigation
 export reload = Generic.make
@@ -248,6 +257,9 @@ export upload = Generic.make
 upload.define [ ElementHandle, Array ], ( element, paths ) ->
   element.uploadFile ...paths
 
+upload.define [ Array, Array ], ( elements, paths ) ->
+  upload elements[0], paths
+
 export drag = Generic.make
   name: "Mimic.drag"
   default: ( target ) ->
@@ -261,6 +273,8 @@ drag.define [ ElementHandle ], ( element ) ->
   await element.frame().page().mouse.move x, y
   element.frame().page().mouse.down()
 
+drag.define [ Array ], ( elements ) -> drag elements[0]
+
 export drop = Generic.make
   name: "Mimic.drop"
   default: ( target ) ->
@@ -273,6 +287,8 @@ drop.define [ ElementHandle ], ( element ) ->
   y = box.y + box.height / 2
   await element.frame().page().mouse.move x, y
   element.frame().page().mouse.up()
+
+drop.define [ Array ], ( elements ) -> drop elements[0]
 
 # inspection
 export visible = Generic.make
@@ -371,6 +387,8 @@ export blur = Generic.make
 blur.define [ ElementHandle ], ( element ) ->
   element.evaluate ( node ) -> node.blur()
 
+blur.define [ Array ], ( elements ) -> blur elements[0]
+
 # dialog
 export dialog =
   accept: Generic.make
@@ -412,6 +430,8 @@ export hover = Generic.make
 hover.define [ ElementHandle ], ( element ) ->
   element.hover()
 
+hover.define [ Array ], ( elements ) -> hover elements[0]
+
 # focus
 export focus = Generic.make
   name: "Mimic.focus"
@@ -422,6 +442,8 @@ export focus = Generic.make
 focus.define [ ElementHandle ], ( element ) ->
   element.focus()
 
+focus.define [ Array ], ( elements ) -> focus elements[0]
+
 # clear
 export clear = Generic.make
   name: "Mimic.clear"
@@ -431,6 +453,8 @@ export clear = Generic.make
 
 clear.define [ ElementHandle ], ( element ) ->
   element.evaluate ( node ) -> node.value = ""
+
+clear.define [ Array ], ( elements ) -> clear elements[0]
 
 # press
 export press = Generic.make
@@ -460,6 +484,8 @@ submit.define [ ElementHandle ], ( element ) ->
         button.click()
       else
         node.submit()
+
+submit.define [ Array ], ( elements ) -> submit elements[0]
 
 # text
 export text = Generic.make
