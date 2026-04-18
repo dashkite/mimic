@@ -11,7 +11,7 @@ import { pipe } from "@dashkite/joy/function"
 import Mimic from "@dashkite/mimic"
 
 await pipe [
-  Mimic.start browser
+  Mimic.browser()
   Mimic.context
   Mimic.page
   Mimic.goto "https://example.com"
@@ -44,13 +44,22 @@ import Mimic from "@dashkite/mimic"
 
 # Example: Submitting a login form
 await pipe [
-  Mimic.start browser
+  Mimic.browser()
   Mimic.page
   Mimic.goto "/login"
   Mimic.select "input[name='username']"
   Mimic.type "alice"
   Mimic.select "form"
   Mimic.submit
+]
+
+# Example: Emulating a device
+await pipe [
+  Mimic.browser()
+  Mimic.page
+  Mimic.emulate "iphone/15"
+  Mimic.goto "https://example.com"
+  Mimic.screenshot.image path: "iphone-example.png"
 ]
 ```
 

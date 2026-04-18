@@ -4,10 +4,10 @@ Detailed API documentation for Mimic combinators. All combinators are asynchrono
 
 ## Lifecycle & Navigation
 
-#### start
-$start: browser \dashrightarrow stack$
+#### browser
+$browser: options \dashrightarrow [ browser ]$
 
-Initiates a Mimic flow by wrapping a Puppeteer `browser` instance and placing it on the stack.
+Launches a Puppeteer browser instance using the provided `options` and returns it in an array (initial stack).
 
 #### context
 $context: \dashrightarrow context$
@@ -23,16 +23,49 @@ Creates a new page within the current context and pushes it onto the stack. Expe
 $agent: name \dashrightarrow \varnothing$
 
 Sets the user agent for the current page. Expects a `page` at the top of the stack.
+- `name`: A user agent string or a shorthand (e.g., `agent/mac/webkit`).
+
+#### console
+$console: handler \dashrightarrow \varnothing$
+
+Registers a `handler` for browser `console` events. Expects a `page` at the top of the stack.
+
+#### error
+$error: handler \dashrightarrow \varnothing$
+
+Registers a `handler` for browser `pageerror` events. Expects a `page` at the top of the stack.
+
+#### mock
+$mock: pattern, handler \dashrightarrow \varnothing$
+
+Intercepts network requests matching `pattern` (string or regex) and calls `handler`. Expects a `page` at the top of the stack.
 
 #### goto
 $goto: url \dashrightarrow \varnothing$
 
 Navigates the current page to the specified URL. Expects a `page` at the top of the stack.
 
+#### reload
+$reload: options \dashrightarrow \varnothing$
+
+Reloads the current page.
+
+#### back
+$back: options \dashrightarrow \varnothing$
+
+Navigates to the previous page in history.
+
+#### forward
+$forward: options \dashrightarrow \varnothing$
+
+Navigates to the next page in history.
+
 #### wait
-$wait: \dashrightarrow \varnothing$
+$wait: options \dashrightarrow \varnothing$
 
 Waits for the current page to reach a network idle state.
+- `options.idleTime`: Duration of network idle time to wait for (default: 500ms).
+- `options.timeout`: Maximum time to wait (default: 10000ms).
 
 #### waitFor
 $waitFor: condition, options \dashrightarrow \varnothing$
@@ -40,6 +73,64 @@ $waitFor: condition, options \dashrightarrow \varnothing$
 Waits for a specific condition.
 - If `condition` is a string, it waits for the selector to appear.
 - If `condition` is a function, it evaluates it in the browser context until it returns truthy.
+- `options.timeout`: Maximum time to wait (default: 10000ms).
+
+## Emulation
+
+#### viewport
+$viewport: options \dashrightarrow \varnothing$
+
+Sets the page's screen size and other viewport properties.
+- `options`: A viewport object or a shorthand (e.g., `view/mac`).
+
+#### emulate
+$emulate: device \dashrightarrow \varnothing$
+
+Emulates a specific device (viewport and user agent).
+- `device`: A device object or a shorthand (e.g., `iphone/15`).
+
+#### media
+$media: type, features \dashrightarrow \varnothing$
+
+Emulates a media type (e.g., `print`) or features (e.g., `prefers-color-scheme`).
+
+## Clock
+
+#### clock.tick
+$clock.tick: ms \dashrightarrow \varnothing$
+
+Fast-forwards the browser's virtual time by the specified number of milliseconds.
+
+## Storage
+
+#### storage.clear
+$storage.clear: \dashrightarrow \varnothing$
+
+Clears `localStorage` and `sessionStorage` for the current page.
+
+## Dialog
+
+#### dialog.accept
+$dialog.accept: \dashrightarrow \varnothing$
+
+Registers a listener to automatically accept the next browser dialog.
+
+#### dialog.dismiss
+$dialog.dismiss: \dashrightarrow \varnothing$
+
+Registers a listener to automatically dismiss the next browser dialog.
+
+## Cookies
+
+#### cookies.get
+$cookies.get: \dashrightarrow cookies$
+
+Pushes the cookies for the current page or context onto the stack.
+
+#### cookies.set
+$cookies.set: cookies \dashrightarrow \varnothing$
+
+Sets cookies for the current page or context.
 
 ## Inspection & Debugging
 
@@ -47,11 +138,6 @@ Waits for a specific condition.
 $content: \dashrightarrow html$
 
 Pushes the HTML content of the current page onto the stack.
-
-#### count
-$count: \dashrightarrow number$
-
-Pushes the number of elements in the current collection onto the stack. Expects an array of element handles at the top of the stack.
 
 #### text
 $text: \dashrightarrow values$
@@ -63,10 +149,25 @@ $attribute: name \dashrightarrow value$
 
 Pushes the value of the specified attribute for the **first** node in the collection onto the stack.
 
-#### screenshot
-$screenshot: path \dashrightarrow \varnothing$
+#### visible
+$visible: \dashrightarrow nodes$
 
-Takes a screenshot of the current page and saves it to the specified path.
+Filters the current collection of nodes, keeping only those that are visible.
+
+#### accessibility
+$accessibility: \dashrightarrow snapshot$
+
+Pushes a snapshot of the current accessibility tree.
+
+#### screenshot.image
+$screenshot.image: options \dashrightarrow \varnothing$
+
+Takes a screenshot of the current page or element.
+
+#### screenshot.pdf
+$screenshot.pdf: options \dashrightarrow \varnothing$
+
+Generates a PDF of the current page.
 
 #### pause
 $pause: \dashrightarrow \varnothing$
@@ -106,32 +207,27 @@ $click: \dashrightarrow \varnothing$
 
 Simulates a click on the **first** node in the current collection.
 
-#### hover
-$hover: \dashrightarrow \varnothing$
+#### blur
+$blur: \dashrightarrow \varnothing$
 
-Simulates moving the mouse over the **first** node in the current collection.
-
-#### focus
-$focus: \dashrightarrow \varnothing$
-
-Focuses the **first** node in the current collection.
-
-#### clear
-$clear: \dashrightarrow \varnothing$
-
-Clears the `value` of the **first** node in the current collection.
+Removes focus from the **first** node in the current collection.
 
 #### type
 $type: text \dashrightarrow \varnothing$
 
 Simulates typing the specified text into the **first** node in the current collection.
 
-#### press
-$press: key \dashrightarrow \varnothing$
+#### upload
+$upload: ...paths \dashrightarrow \varnothing$
 
-Simulates a single key press (e.g., "Enter", "Tab").
+Uploads files to the **first** node in the current collection (expects a file input).
 
-#### submit
-$submit: \dashrightarrow \varnothing$
+#### drag
+$drag: \dashrightarrow \varnothing$
 
-Triggers a form submission for the **first** node in the current collection. Attempts `requestSubmit`, then finding a submit button, and finally `submit()`.
+Simulates a mouse down event on the **first** node in the current collection and moves the mouse to its center.
+
+#### drop
+$drop: \dashrightarrow \varnothing$
+
+Simulates moving the mouse to the center of the **first** node in the current collection and a mouse up event.

@@ -1,2 +1,88 @@
-  mac/webkit: 
-    Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36
+# -- User Agents --
+
+# Desktop
+agent/mac/webkit: &mac_webkit "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+agent/mac/chrome: &mac_chrome "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+agent/windows/chrome: &win_chrome "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+agent/linux/chrome: &linux_chrome "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+
+# Mobile
+agent/iphone/15: &iphone_15 "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+agent/android/chrome: &android_chrome "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"
+
+# Tablet
+agent/ipad: &ipad_ua "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+agent/android/tablet: &android_tablet_ua "Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+
+# -- Viewports --
+
+# Desktop
+view/hd: &view_hd { width: 1920, height: 1080 }
+view/mac: &view_mac { width: 1440, height: 900 }
+
+# Mobile
+view/iphone/15: &view_iphone_15
+  width: 393
+  height: 852
+  deviceScaleFactor: 3
+  isMobile: true
+  hasTouch: true
+
+view/android/pixel8: &view_pixel8
+  width: 412
+  height: 915
+  deviceScaleFactor: 3
+  isMobile: true
+  hasTouch: true
+
+# Tablet
+view/ipad: &view_ipad
+  width: 810
+  height: 1080
+  deviceScaleFactor: 2
+  isMobile: true
+  hasTouch: true
+
+view/ipad/pro: &view_ipad_pro
+  width: 1024
+  height: 1366
+  deviceScaleFactor: 2
+  isMobile: true
+  hasTouch: true
+
+view/android/tablet: &view_android_tablet
+  width: 800
+  height: 1280
+  deviceScaleFactor: 2
+  isMobile: true
+  hasTouch: true
+
+# -- Devices --
+
+mac/webkit:
+  userAgent: *mac_webkit
+  viewport: *view_mac
+
+mac/chrome:
+  userAgent: *mac_chrome
+  viewport: *view_mac
+
+iphone/15:
+  userAgent: *iphone_15
+  viewport: *view_iphone_15
+
+pixel/8:
+  userAgent: *android_chrome
+  viewport: *view_pixel8
+
+ipad:
+  userAgent: *ipad_ua
+  viewport: *view_ipad
+
+ipad/pro:
+  userAgent: *ipad_ua
+  viewport: *view_ipad_pro
+
+android/tablet:
+  userAgent: *android_tablet_ua
+  viewport: *view_android_tablet

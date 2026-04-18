@@ -37,7 +37,9 @@
     "@dashkite/genie-yaml": "^0.11.13"
   },
   "dependencies": {
+    "@dashkite/generic": "^0.9.19",
     "@dashkite/joy": "^0.12.25",
-    "@dashkite/katana": "link:../katana"
+    "@dashkite/katana": "link:../katana",
+    "puppeteer": "^24.41.0"
   }
 }

@@ -14,13 +14,13 @@ Chain lifecycle and DOM interaction combinators.
 ```coffeescript
 import Mimic from "@dashkite/mimic"
 
-await pipe [
+await do pipe [
   Mimic.start browser
   Mimic.page
   Mimic.goto "https://example.com"
   Mimic.select "h1"
   Mimic.text
-  ([ heading ]) -> assert.equal heading, "Example Domain"
+  ([ rest..., [ heading ] ]) -> assert.equal heading, "Example Domain"
 ]
 ```
 
@@ -44,7 +44,7 @@ Use the `shadow` combinator to enter the shadow root.
 
 ### Example
 ```coffeescript
-await pipe [
+await do pipe [
   Mimic.start browser
   Mimic.page
   Mimic.goto "http://localhost:3000"
@@ -73,7 +73,7 @@ Sequence `select`, `type`, and `submit` operations.
 
 ### Example
 ```coffeescript
-await pipe [
+await do pipe [
   Mimic.start browser
   Mimic.page
   Mimic.goto "/register"
