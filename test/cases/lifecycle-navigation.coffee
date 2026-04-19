@@ -16,8 +16,7 @@ export default ( start ) ->
 
     test "browser, context, page", pipe [
       preamble
-      ( stack ) ->
-        [ browser, context, page ] = stack
+      ([ browser, context, page ]) ->
         assert browser?
         assert context?
         assert page?
@@ -30,9 +29,7 @@ export default ( start ) ->
       Mimic.select "h1"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Mimic Test"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "reload, back, forward", pipe [
@@ -45,9 +42,7 @@ export default ( start ) ->
       K.peek ( page ) -> assert page.url().includes "post"
       Mimic.reload
       K.peek ( page ) -> assert page.url().includes "post"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
   ]

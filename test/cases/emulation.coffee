@@ -26,9 +26,7 @@ export default ( start ) ->
         assert result.userAgent.includes "Safari"
         assert.equal result.width, 1920
         assert.equal result.height, 1080
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "media", pipe [
@@ -42,9 +40,7 @@ export default ( start ) ->
       Mimic.media "print"
       Mimic.evaluate -> getComputedStyle(document.body).color
       K.peek ( color ) -> assert.equal color, "rgb(255, 0, 0)"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
   ]

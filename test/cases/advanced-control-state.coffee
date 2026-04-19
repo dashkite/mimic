@@ -24,9 +24,7 @@ export default ( start ) ->
       Mimic.storage.clear
       Mimic.evaluate -> localStorage.getItem "test-key"
       K.peek ( value ) -> assert value == null
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "cookies", pipe [
@@ -42,9 +40,7 @@ export default ( start ) ->
       K.peek ( cookies ) ->
         cookie = cookies.find ( c ) -> c.name == "another-cookie"
         assert.equal cookie.value, "another-value"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "mock", pipe [
@@ -60,9 +56,7 @@ export default ( start ) ->
         document.body.textContent = data.greeting
       K.drop
       Mimic.waitFor -> document.body.textContent.includes "Hello from Mock"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "clock", pipe [
@@ -79,9 +73,7 @@ export default ( start ) ->
       """
       Mimic.clock.tick 5000
       Mimic.waitFor -> document.getElementById('out').textContent == 'Timed Out'
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "dialog.accept", pipe [
@@ -91,9 +83,7 @@ export default ( start ) ->
       Mimic.dialog.accept
       Mimic.evaluate -> confirm "Are you sure?"
       K.peek ( result ) -> assert result == true
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "dialog.dismiss", pipe [
@@ -103,9 +93,7 @@ export default ( start ) ->
       Mimic.dialog.dismiss
       Mimic.evaluate -> confirm "Are you sure?"
       K.peek ( result ) -> assert result == false
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "screenshots", pipe [
@@ -131,9 +119,7 @@ export default ( start ) ->
             FS.rmdirSync tmp
             stack
         ]
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
   ]

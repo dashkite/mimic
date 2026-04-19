@@ -56,17 +56,17 @@ $goto: url \dashrightarrow \varnothing$
 Navigates the current page to the specified URL. Expects a `page` at the top of the stack.
 
 #### reload
-$reload: options \dashrightarrow \varnothing$
+$reload: \dashrightarrow \varnothing$
 
 Reloads the current page.
 
 #### back
-$back: options \dashrightarrow \varnothing$
+$back: \dashrightarrow \varnothing$
 
 Navigates to the previous page in history.
 
 #### forward
-$forward: options \dashrightarrow \varnothing$
+$forward: \dashrightarrow \varnothing$
 
 Navigates to the next page in history.
 

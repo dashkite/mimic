@@ -20,18 +20,14 @@ export default ( start ) ->
       Mimic.select "#test-id"
       Mimic.attribute "class"
       K.peek ( value ) -> assert.equal value, "test-class"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "evaluate", pipe [
       preamble
       Mimic.evaluate -> 1 + 1
       K.peek ( result ) -> assert.equal result, 2
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "content", pipe [
@@ -39,9 +35,7 @@ export default ( start ) ->
       Mimic.goto "data:text/html,<span>Test</span>"
       Mimic.content
       K.peek ( html ) -> assert html.includes "<span>Test</span>"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "shadow", pipe [
@@ -62,9 +56,7 @@ export default ( start ) ->
       Mimic.select "h1"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Shadow Content"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "visible", pipe [
@@ -79,9 +71,7 @@ export default ( start ) ->
       K.peek ( texts ) ->
         assert.equal texts.length, 1
         assert.equal texts[0], "Visible"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "waitFor", pipe [
@@ -101,9 +91,7 @@ export default ( start ) ->
       K.drop
       K.drop
       Mimic.waitFor -> document.getElementById('container').childElementCount == 1
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "accessibility", pipe [
@@ -115,9 +103,7 @@ export default ( start ) ->
       K.peek ( snapshot ) ->
         button = snapshot.children.find ( node ) -> node.name == "Submit Form"
         assert button?
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
   ]

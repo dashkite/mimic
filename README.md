@@ -17,7 +17,7 @@ await pipe [
   Mimic.goto "https://example.com"
   Mimic.select "h1"
   Mimic.text
-  ( stack ) -> assert.equal stack[0][0], "Example Domain"
+  ([ texts ]) -> assert.equal texts[0], "Example Domain"
 ]
 ```
 

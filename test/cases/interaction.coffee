@@ -60,9 +60,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Clicked"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "hover", pipe [
@@ -73,9 +71,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Hovered"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "focus", pipe [
@@ -86,9 +82,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Focused"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "blur", pipe [
@@ -100,9 +94,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Blurred"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "press", pipe [
@@ -111,9 +103,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Pressed Enter"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "scroll", pipe [
@@ -121,9 +111,7 @@ export default ( start ) ->
       Mimic.scroll "bottom"
       Mimic.evaluate -> window.scrollY > 0
       K.peek ( scrolled ) -> assert scrolled
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "submit", pipe [
@@ -134,9 +122,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Submitted"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "drag, drop", pipe [
@@ -151,9 +137,7 @@ export default ( start ) ->
       Mimic.select "#status"
       Mimic.text
       K.peek ( texts ) -> assert.equal texts[0], "Dropped"
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
     test "upload", pipe [
@@ -179,9 +163,7 @@ export default ( start ) ->
         path = Path.join tmp, "test-upload.txt"
         FS.unlinkSync path
         FS.rmdirSync tmp
-      ( stack ) ->
-        [ browser, context ] = stack
-        context.close()
+      ([ browser, context ]) -> context.close()
     ]
 
   ]
