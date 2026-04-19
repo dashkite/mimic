@@ -93,23 +93,22 @@ do ->
         """
         Mimic.select "#input"
         Mimic.type "Hello Mimic"
-        K.drop
+        ( stack ) -> stack[...-1]
         Mimic.select "#button"
         Mimic.click
-        K.drop
+        ( stack ) -> stack[...-1]
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) -> 
           assert.equal texts[0], "Hello Mimic"
-        K.drop
-        K.drop
+        ( stack ) -> stack[...-2]
         Mimic.select "#input"
         Mimic.clear
         Mimic.type "New Text"
-        K.drop
+        ( stack ) -> stack[...-1]
         Mimic.select "#button"
         Mimic.click
-        K.drop
+        ( stack ) -> stack[...-1]
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) ->
@@ -148,7 +147,7 @@ do ->
         Mimic.page
         Mimic.goto "https://httpbin.org/html"
         Mimic.evaluate -> localStorage.setItem "test-key", "test-value"
-        K.drop
+        ( stack ) -> stack[...-1]
         Mimic.storage.clear
         Mimic.evaluate -> localStorage.getItem "test-key"
       ]
@@ -171,6 +170,125 @@ do ->
       [ browser, ..., texts ] = stack
       assert.equal texts.length, 1
       assert.equal texts[0], "Visible"
+      await browser.close()
+
+    test "Cookies (cookies.get, cookies.set)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto "https://httpbin.org/cookies/set?test-cookie=test-value"
+        Mimic.cookies.get
+        K.peek ( cookies ) ->
+          cookie = cookies.find ( c ) -> c.name == "test-cookie"
+          assert.equal cookie.value, "test-value"
+        ( stack ) -> stack[...-1]
+        Mimic.cookies.set [ name: "another-cookie", value: "another-value", domain: "httpbin.org" ]
+        Mimic.cookies.get
+        K.peek ( cookies ) ->
+          cookie = cookies.find ( c ) -> c.name == "another-cookie"
+          assert.equal cookie.value, "another-value"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Navigation (reload, back, forward)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto "https://httpbin.org/html"
+        Mimic.goto "https://httpbin.org/forms/post"
+        Mimic.back
+        K.peek ( page ) -> assert page.url().includes "html"
+        Mimic.forward
+        K.peek ( page ) -> assert page.url().includes "post"
+        Mimic.reload
+        K.peek ( page ) -> assert page.url().includes "post"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Wait For (waitFor selector, waitFor function)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="container"></div>
+          <script>
+            setTimeout(() => {
+              document.getElementById('container').innerHTML = '<div id="late">Late</div>';
+            }, 500);
+          </script>
+        """
+        Mimic.waitFor "#late"
+        Mimic.select "#late"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Late"
+        ( stack ) -> stack[...-2]
+        Mimic.waitFor -> document.getElementById('container').childElementCount == 1
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Dialogs (dialog.dismiss)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.dialog.dismiss
+        Mimic.evaluate -> confirm "Are you sure?"
+        K.peek ( result ) -> assert result == false
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Network Mocking (mock)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto "https://httpbin.org/html"
+        Mimic.mock /mocked\.json$/, ( request ) ->
+          request.respond
+            contentType: "application/json"
+            body: JSON.stringify greeting: "Hello from Mock"
+        Mimic.evaluate ->
+          response = await fetch 'mocked.json'
+          data = await response.json()
+          document.body.textContent = data.greeting
+        ( stack ) -> stack[...-1]
+        Mimic.waitFor -> document.body.textContent.includes "Hello from Mock"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Media Emulation (media)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <style>
+            @media print { body { color: rgb(255, 0, 0); } }
+          </style>
+          <body>Media Test</body>
+        """
+        Mimic.media "print"
+        Mimic.evaluate -> getComputedStyle(document.body).color
+        K.peek ( color ) -> assert.equal color, "rgb(255, 0, 0)"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Accessibility (accessibility)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <button aria-label="Submit Form">Button</button>
+        """
+        Mimic.accessibility
+        K.peek ( snapshot ) ->
+          button = snapshot.children.find ( node ) -> node.name == "Submit Form"
+          assert button?
+      ]
+      [ browser ] = stack
       await browser.close()
 
   ]

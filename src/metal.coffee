@@ -1,6 +1,6 @@
 import Generic from "@dashkite/generic"
 import * as Time from "@dashkite/joy/time"
-import { isType } from "@dashkite/joy/type"
+import { isKind } from "@dashkite/joy/type"
 import {
   Page
   BrowserContext
@@ -10,7 +10,8 @@ import {
 
 # -- Predicates --
 
-isTarget = ( x ) -> ( isType Page, x ) || ( isType JSHandle, x )
+isPage = isKind Page
+isTarget = ( x ) -> ( isKind Page, x ) || ( isKind JSHandle, x )
 
 # -- Generic Dispatchers --
 
@@ -22,7 +23,7 @@ export select = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ].
       Ensure you have a valid context for querying."
 
-select.define [ Page, String ], ( page, selector ) -> 
+select.define [ isPage, String ], ( page, selector ) -> 
   page.$$ selector
 
 select.define [ ElementHandle, String ], ( element, selector ) -> 
@@ -107,7 +108,7 @@ export evaluate = Generic.make
     throw new Error "evaluate: expected Page or Handle,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-evaluate.define [ Page, Function ], ( page, f ) -> 
+evaluate.define [ isPage, Function ], ( page, f ) -> 
   page.evaluate f
 
 evaluate.define [ JSHandle, Function ], ( handle, f ) -> 
@@ -120,7 +121,7 @@ export wait = Generic.make
     throw new Error "wait: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-wait.define [ Page, Object ], ( page, options ) ->
+wait.define [ isPage, Object ], ( page, options ) ->
   page.waitForNetworkIdle do ->
     Object.assign { idleTime: 500, timeout: 10000 }, options
 
@@ -153,13 +154,13 @@ export screenshot =
       throw new Error "screenshot.pdf: expected Page,
         but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-screenshot.image.define [ Page, Object ], ( page, options ) ->
+screenshot.image.define [ isPage, Object ], ( page, options ) ->
   page.screenshot options
 
 screenshot.image.define [ ElementHandle, Object ], ( element, options ) ->
   element.screenshot options
 
-screenshot.pdf.define [ Page, Object ], ( page, options ) ->
+screenshot.pdf.define [ isPage, Object ], ( page, options ) ->
   page.pdf options
 
 # cookies
@@ -175,10 +176,10 @@ export cookies =
       throw new Error "cookies.set: expected Page or BrowserContext,
         but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-cookies.get.define [ Page ], ( page ) -> page.cookies()
+cookies.get.define [ isPage ], ( page ) -> page.cookies()
 cookies.get.define [ BrowserContext ], ( context ) -> context.cookies()
 
-cookies.set.define [ Page, Array ], ( page, cookies ) -> 
+cookies.set.define [ isPage, Array ], ( page, cookies ) -> 
   page.setCookie ...cookies
 
 cookies.set.define [ BrowserContext, Array ], ( context, cookies ) ->
@@ -191,7 +192,7 @@ export viewport = Generic.make
     throw new Error "viewport: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-viewport.define [ Page, Object ], ( page, options ) ->
+viewport.define [ isPage, Object ], ( page, options ) ->
   page.setViewport options
 
 # emulate
@@ -202,10 +203,10 @@ export emulate = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]
       and [ #{ device?.constructor?.name ? typeof device } ]."
 
-emulate.define [ Page, String ], ( page, userAgent ) ->
+emulate.define [ isPage, String ], ( page, userAgent ) ->
   page.setUserAgent userAgent
 
-emulate.define [ Page, Object ], ( page, device ) ->
+emulate.define [ isPage, Object ], ( page, device ) ->
   page.emulate device
 
 # media
@@ -215,19 +216,32 @@ export media = Generic.make
     throw new Error "media: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-media.define [ Page, String, Array ], ( page, type, features ) ->
-  if type? then await page.emulateMediaType type
-  if features? then await page.emulateMediaFeatures features
+media.define [ isPage, String ], ( page, type ) ->
+  page.emulateMediaType type
+
+media.define [ isPage, String, Array ], ( page, type, features ) ->
+  await page.emulateMediaType type
+  page.emulateMediaFeatures features
 
 # navigation
+export goto = Generic.make
+  name: "Mimic.goto"
+  default: ( target, url, options ) ->
+    throw new Error "goto: expected Page and String,
+      but received [ #{ target?.constructor?.name ? typeof target } ]
+      and [ #{ url?.constructor?.name ? typeof url } ]."
+
+goto.define [ isPage, String, Object ], ( page, url, options ) ->
+  page.goto url, options
+
 export reload = Generic.make
   name: "Mimic.reload"
   default: ( target ) ->
     throw new Error "reload: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-reload.define [ Page, Object ], ( page, options ) ->
-  page.reload options
+reload.define [ isPage ], ( page ) ->
+  page.reload waitUntil: "networkidle2"
 
 export back = Generic.make
   name: "Mimic.back"
@@ -235,8 +249,8 @@ export back = Generic.make
     throw new Error "back: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-back.define [ Page, Object ], ( page, options ) ->
-  page.goBack options
+back.define [ isPage ], ( page ) ->
+  page.goBack waitUntil: "networkidle2"
 
 export forward = Generic.make
   name: "Mimic.forward"
@@ -244,8 +258,8 @@ export forward = Generic.make
     throw new Error "forward: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-forward.define [ Page, Object ], ( page, options ) ->
-  page.goForward options
+forward.define [ isPage ], ( page ) ->
+  page.goForward waitUntil: "networkidle2"
 
 # interaction
 export upload = Generic.make
@@ -310,7 +324,7 @@ export accessibility = Generic.make
     throw new Error "accessibility: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-accessibility.define [ Page ], ( page ) ->
+accessibility.define [ isPage ], ( page ) ->
   page.accessibility.snapshot()
 
 export agent = Generic.make
@@ -320,7 +334,7 @@ export agent = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]
       and [ #{ agent?.constructor?.name ? typeof agent } ]."
 
-agent.define [ Page, String ], ( page, agent ) ->
+agent.define [ isPage, String ], ( page, agent ) ->
   page.setUserAgent agent
 
 export content = Generic.make
@@ -329,25 +343,25 @@ export content = Generic.make
     throw new Error "content: expected Page,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-content.define [ Page ], ( page ) ->
+content.define [ isPage ], ( page ) ->
   page.content()
 
 # mock
 export mock = Generic.make
   name: "Mimic.mock"
   default: ( target, pattern, handler ) ->
-    throw new Error "mock: expected Page, String, and Function,
+    throw new Error "mock: expected Page, RegExp, and Function,
       but received [ #{ target?.constructor?.name ? typeof target } ],
       [ #{ pattern?.constructor?.name ? typeof pattern } ],
       and [ #{ handler?.constructor?.name ? typeof handler } ]."
 
-mock.define [ Page, String, Function ], ( page, pattern, handler ) ->
-  await page.setRequestInterception true
+mock.define [ isPage, RegExp, Function ], ( page, pattern, handler ) ->
   page.on "request", ( request ) ->
     if ( request.url().match pattern )
       handler request
     else
       request.continue()
+  await page.setRequestInterception true
 
 # clock
 export clock =
@@ -358,7 +372,7 @@ export clock =
         but received [ #{ target?.constructor?.name ? typeof target } ]
         and [ #{ ms?.constructor?.name ? typeof ms } ]."
 
-clock.tick.define [ Page, Number ], ( page, ms ) ->
+clock.tick.define [ isPage, Number ], ( page, ms ) ->
   client = await page.createCDPSession()
   client.send "Emulation.setVirtualTimePolicy",
     policy: "advance"
@@ -372,7 +386,7 @@ export storage =
       throw new Error "storage.clear: expected Page,
         but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-storage.clear.define [ Page ], ( page ) ->
+storage.clear.define [ isPage ], ( page ) ->
   page.evaluate ->
     localStorage.clear()
     sessionStorage.clear()
@@ -402,10 +416,10 @@ export dialog =
       throw new Error "dialog.dismiss: expected Page,
         but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-dialog.accept.define [ Page ], ( page ) ->
+dialog.accept.define [ isPage ], ( page ) ->
   page.on "dialog", ( dialog ) -> dialog.accept()
 
-dialog.dismiss.define [ Page ], ( page ) ->
+dialog.dismiss.define [ isPage ], ( page ) ->
   page.on "dialog", ( dialog ) -> dialog.dismiss()
 
 # scroll
@@ -416,7 +430,7 @@ export scroll = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]
       and [ #{ position?.constructor?.name ? typeof position } ]."
 
-scroll.define [ Page, String ], ( page, position ) ->
+scroll.define [ isPage, String ], ( page, position ) ->
   if position == "bottom"
     page.evaluate -> window.scrollTo 0, document.body.scrollHeight
 
@@ -464,7 +478,7 @@ export press = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]
       and [ #{ key?.constructor?.name ? typeof key } ]."
 
-press.define [ Page, String ], ( page, key ) ->
+press.define [ isPage, String ], ( page, key ) ->
   page.keyboard.press key
 
 # submit
