@@ -53,7 +53,11 @@ Mimic =
   emulate: ( device ) ->
     K.peek ( page ) -> _.emulate page, ( resolve device )
   media: ( type, features ) ->
-    K.peek ( page ) -> _.media page, type, features
+    K.peek ( page ) -> 
+      if features?
+        _.media page, type, features
+      else
+        _.media page, type
 
   # Cookies (Push/Peek)
   cookies:
@@ -61,12 +65,12 @@ Mimic =
     set: ( cookies ) -> K.peek ( target ) -> _.cookies.set target, cookies
 
   # Navigation (Peek)
-  reload: ( options ) -> K.peek ( page ) -> _.reload page, options
-  back: ( options ) -> K.peek ( page ) -> _.back page, options
-  forward: ( options ) -> K.peek ( page ) -> _.forward page, options
+  reload: K.peek ( page ) -> _.reload page
+  back: K.peek ( page ) -> _.back page
+  forward: K.peek ( page ) -> _.forward page
   goto: ( url, options = {} ) -> 
     options.waitUntil ?= "networkidle2"
-    K.peek ( page ) -> page.goto url, options
+    K.peek ( page ) -> _.goto page, url, options
 
   # Synchronization (Peek)
   wait: ( options = {} ) -> K.peek ( target ) -> _.wait target, options

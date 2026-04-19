@@ -284,8 +284,8 @@ drag.define [ ElementHandle ], ( element ) ->
   box = await element.boundingBox()
   x = box.x + box.width / 2
   y = box.y + box.height / 2
-  await element.frame().page().mouse.move x, y
-  element.frame().page().mouse.down()
+  await element.frame.page().mouse.move x, y
+  element.frame.page().mouse.down()
 
 drag.define [ Array ], ( elements ) -> drag elements[0]
 
@@ -299,8 +299,8 @@ drop.define [ ElementHandle ], ( element ) ->
   box = await element.boundingBox()
   x = box.x + box.width / 2
   y = box.y + box.height / 2
-  await element.frame().page().mouse.move x, y
-  element.frame().page().mouse.up()
+  await element.frame.page().mouse.move x, y
+  element.frame.page().mouse.up()
 
 drop.define [ Array ], ( elements ) -> drop elements[0]
 

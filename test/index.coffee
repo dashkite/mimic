@@ -1,3 +1,5 @@
+import FS from "fs"
+import Path from "path"
 import assert from "@dashkite/assert"
 import { test, success } from "@dashkite/amen"
 import print from "@dashkite/amen-console"
@@ -93,10 +95,10 @@ do ->
         """
         Mimic.select "#input"
         Mimic.type "Hello Mimic"
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.select "#button"
         Mimic.click
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) -> 
@@ -105,10 +107,10 @@ do ->
         Mimic.select "#input"
         Mimic.clear
         Mimic.type "New Text"
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.select "#button"
         Mimic.click
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) ->
@@ -147,7 +149,7 @@ do ->
         Mimic.page
         Mimic.goto "https://httpbin.org/html"
         Mimic.evaluate -> localStorage.setItem "test-key", "test-value"
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.storage.clear
         Mimic.evaluate -> localStorage.getItem "test-key"
       ]
@@ -181,7 +183,7 @@ do ->
         K.peek ( cookies ) ->
           cookie = cookies.find ( c ) -> c.name == "test-cookie"
           assert.equal cookie.value, "test-value"
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.cookies.set [ name: "another-cookie", value: "another-value", domain: "httpbin.org" ]
         Mimic.cookies.get
         K.peek ( cookies ) ->
@@ -253,7 +255,7 @@ do ->
           response = await fetch 'mocked.json'
           data = await response.json()
           document.body.textContent = data.greeting
-        ( stack ) -> stack[...-1]
+        K.drop
         Mimic.waitFor -> document.body.textContent.includes "Hello from Mock"
       ]
       [ browser ] = stack
@@ -290,6 +292,72 @@ do ->
       ]
       [ browser ] = stack
       await browser.close()
+
+    test "Clock (clock.tick)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="out">Initial</div>
+          <script>
+            setTimeout(() => {
+              document.getElementById('out').textContent = 'Timed Out';
+            }, 5000);
+          </script>
+        """
+        Mimic.clock.tick 5000
+        Mimic.waitFor -> document.getElementById('out').textContent == 'Timed Out'
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Drag and Drop (drag, drop)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="source" style="width:50px;height:50px;background:red">Source</div>
+          <div id="target" style="width:100px;height:100px;background:blue;margin-top:20px">Target</div>
+          <script>
+            const source = document.getElementById('source');
+            const target = document.getElementById('target');
+            target.addEventListener('mouseup', () => {
+              target.textContent = 'Dropped';
+            });
+          </script>
+        """
+        Mimic.select "#source"
+        Mimic.drag
+        K.drop
+        Mimic.select "#target"
+        Mimic.drop
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Dropped"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Upload (upload)", ->
+      tmpDir = Path.join process.cwd(), "test/tmp"
+      FS.mkdirSync tmpDir, recursive: true
+      path = Path.join tmpDir, "test-upload.txt"
+      FS.writeFileSync path, "Upload Test Content"
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <input type="file" id="file-input">
+        """
+        Mimic.select "#file-input"
+        Mimic.upload path
+        K.drop
+        Mimic.evaluate -> document.getElementById('file-input').files[0].name
+        K.peek ( name ) -> assert.equal name, "test-upload.txt"
+      ]
+      [ browser ] = stack
+      await browser.close()
+      FS.unlinkSync path
+      FS.rmdirSync tmpDir
 
   ]
 
