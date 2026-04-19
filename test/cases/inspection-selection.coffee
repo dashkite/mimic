@@ -4,45 +4,52 @@ import { pipe } from "@dashkite/joy/function"
 import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
-export default ->
+export default ( start ) ->
   test "Inspection & Selection", [
 
     test "attribute", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto 'data:text/html,<div id="test-id" class="test-class"></div>'
         Mimic.select "#test-id"
         Mimic.attribute "class"
+        K.peek ( value ) -> assert.equal value, "test-class"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser, ..., value ] = stack
-      assert.equal value, "test-class"
-      await browser.close()
 
     test "evaluate", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.evaluate -> 1 + 1
+        K.peek ( result ) -> assert.equal result, 2
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser, ..., result ] = stack
-      assert.equal result, 2
-      await browser.close()
 
     test "content", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto "data:text/html,<span>Test</span>"
         Mimic.content
+        K.peek ( html ) -> assert html.includes "<span>Test</span>"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser, ..., html ] = stack
-      assert html.includes "<span>Test</span>"
-      await browser.close()
 
     test "shadow", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <script>
@@ -59,14 +66,16 @@ export default ->
         Mimic.shadow
         Mimic.select "h1"
         Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Shadow Content"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser, ..., texts ] = stack
-      assert.equal texts[0], "Shadow Content"
-      await browser.close()
 
     test "visible", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div class="item">Visible</div>
@@ -75,15 +84,18 @@ export default ->
         Mimic.select ".item"
         Mimic.visible
         Mimic.text
+        K.peek ( texts ) ->
+          assert.equal texts.length, 1
+          assert.equal texts[0], "Visible"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser, ..., texts ] = stack
-      assert.equal texts.length, 1
-      assert.equal texts[0], "Visible"
-      await browser.close()
 
     test "waitFor", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="container"></div>
@@ -99,13 +111,15 @@ export default ->
         K.peek ( texts ) -> assert.equal texts[0], "Late"
         ( stack ) -> stack[...-2]
         Mimic.waitFor -> document.getElementById('container').childElementCount == 1
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "accessibility", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <button aria-label="Submit Form">Button</button>
@@ -114,8 +128,9 @@ export default ->
         K.peek ( snapshot ) ->
           button = snapshot.children.find ( node ) -> node.name == "Submit Form"
           assert button?
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
   ]

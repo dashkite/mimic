@@ -5,9 +5,14 @@ Detailed API documentation for Mimic combinators. All combinators are asynchrono
 ## Lifecycle & Navigation
 
 #### browser
-$browser: options \dashrightarrow [ browser ]$
+$browser: \dashrightarrow [ browser ]$
 
-Launches a Puppeteer browser instance using the provided `options` and returns it in an array (initial stack).
+Launches a Puppeteer browser instance using default options and returns it in an array (initial stack).
+
+#### browser.with
+$browser.with: options \dashrightarrow combinator$
+
+Returns a combinator that, when called, launches a Puppeteer browser instance with the given `options`.
 
 #### context
 $context: \dashrightarrow context$
@@ -18,6 +23,11 @@ Creates a new browser context and pushes it onto the stack. Expects a `browser` 
 $page: \dashrightarrow page$
 
 Creates a new page within the current context and pushes it onto the stack. Expects a `context` at the top of the stack.
+
+#### close
+$close: \dashrightarrow \varnothing$
+
+Closes the current target (Page, BrowserContext, or Browser). Expects a `page`, `context`, or `browser` at the top of the stack.
 
 #### agent
 $agent: name \dashrightarrow \varnothing$

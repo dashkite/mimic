@@ -18,7 +18,8 @@ Mimic =
   # - Combinators that transform context use K.push
   # - Combinators that interact with context use K.peek
 
-  browser: ( options ) -> -> [ await puppeteer.launch options ]
+  browser: _.browser
+  close: K.peek ( target ) -> _.close target
   context: K.push ( browser ) -> browser.createBrowserContext()
   page: K.push ( context ) -> context.newPage()
 

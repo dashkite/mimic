@@ -1,4 +1,6 @@
 export * from "./predicates"
+export * from "./browser"
+export * from "./close"
 export * from "./select"
 export * from "./shadow"
 export * from "./type"

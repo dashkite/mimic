@@ -6,12 +6,13 @@ import { pipe } from "@dashkite/joy/function"
 import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
-export default ->
+export default ( start ) ->
   test "Interaction", [
 
     test "click, type, clear", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <input id="input">
@@ -20,33 +21,35 @@ export default ->
         """
         Mimic.select "#input"
         Mimic.type "Hello Mimic"
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#button"
         Mimic.click
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) -> 
           assert.equal texts[0], "Hello Mimic"
-        ( stack ) -> stack[...-2]
+        ( stack ) -> stack[...-2] # back to page
         Mimic.select "#input"
         Mimic.clear
         Mimic.type "New Text"
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#button"
         Mimic.click
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#out"
         Mimic.text
         K.peek ( texts ) ->
           assert.equal texts[0], "New Text"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "hover", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="status">None</div>
@@ -59,17 +62,19 @@ export default ->
         """
         Mimic.select "#target"
         Mimic.hover
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#status"
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Hovered"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "focus", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="status">None</div>
@@ -82,17 +87,19 @@ export default ->
         """
         Mimic.select "#target"
         Mimic.focus
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#status"
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Focused"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "blur", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="status">None</div>
@@ -106,17 +113,19 @@ export default ->
         Mimic.select "#target"
         Mimic.focus
         Mimic.blur
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#status"
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Blurred"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "press", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="status">None</div>
@@ -130,13 +139,15 @@ export default ->
         Mimic.select "#status"
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Pressed Enter"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "scroll", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div style="height: 2000px">Spacer</div>
@@ -144,13 +155,15 @@ export default ->
         Mimic.scroll "bottom"
         Mimic.evaluate -> window.scrollY > 0
         K.peek ( scrolled ) -> assert scrolled
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "submit", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="status">None</div>
@@ -160,17 +173,19 @@ export default ->
         """
         Mimic.select "#form"
         Mimic.submit
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#status"
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Submitted"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "drag, drop", ->
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <div id="source" style="width:50px;height:50px;background:red">Source</div>
@@ -185,34 +200,37 @@ export default ->
         """
         Mimic.select "#source"
         Mimic.drag
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.select "#target"
         Mimic.drop
         Mimic.text
         K.peek ( texts ) -> assert.equal texts[0], "Dropped"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
 
     test "upload", ->
       tmp = Path.join process.cwd(), "test/tmp/upload"
       FS.mkdirSync tmp, recursive: true
       path = Path.join tmp, "test-upload.txt"
       FS.writeFileSync path, "Upload Test Content"
-      stack = await do pipe [
-        Mimic.browser()
+      await do pipe [
+        start
+        Mimic.context
         Mimic.page
         Mimic.goto """data:text/html,
           <input type="file" id="file-input">
         """
         Mimic.select "#file-input"
         Mimic.upload path
-        K.drop
+        ( stack ) -> stack[...-1] # back to page
         Mimic.evaluate -> document.getElementById('file-input').files[0].name
         K.peek ( name ) -> assert.equal name, "test-upload.txt"
+        ( stack ) ->
+          [ browser, context ] = stack
+          await context.close()
       ]
-      [ browser ] = stack
-      await browser.close()
       FS.unlinkSync path
       FS.rmdirSync tmp
 
