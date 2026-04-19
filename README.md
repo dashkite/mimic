@@ -10,8 +10,8 @@ Mimic provides a set of stack-based combinators, powered by Katana, for orchestr
 import { pipe } from "@dashkite/joy/function"
 import Mimic from "@dashkite/mimic"
 
-await pipe [
-  Mimic.browser()
+await do pipe [
+  Mimic.browser
   Mimic.context
   Mimic.page
   Mimic.goto "https://example.com"
@@ -43,8 +43,8 @@ Mimic combinators are asynchronous and designed to be used within a Katana-compa
 import Mimic from "@dashkite/mimic"
 
 # Example: Submitting a login form
-await pipe [
-  Mimic.browser()
+await do pipe [
+  Mimic.browser
   Mimic.page
   Mimic.goto "/login"
   Mimic.select "input[name='username']"
@@ -54,8 +54,8 @@ await pipe [
 ]
 
 # Example: Emulating a device
-await pipe [
-  Mimic.browser()
+await do pipe [
+  Mimic.browser
   Mimic.page
   Mimic.emulate "iphone/15"
   Mimic.goto "https://example.com"
