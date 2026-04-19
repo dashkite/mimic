@@ -338,9 +338,9 @@ do ->
       await browser.close()
 
     test "Upload (upload)", ->
-      tmpDir = Path.join process.cwd(), "test/tmp"
-      FS.mkdirSync tmpDir, recursive: true
-      path = Path.join tmpDir, "test-upload.txt"
+      tmp = Path.join process.cwd(), "test/tmp/upload"
+      FS.mkdirSync tmp, recursive: true
+      path = Path.join tmp, "test-upload.txt"
       FS.writeFileSync path, "Upload Test Content"
       stack = await do pipe [
         Mimic.browser()
@@ -357,7 +357,167 @@ do ->
       [ browser ] = stack
       await browser.close()
       FS.unlinkSync path
-      FS.rmdirSync tmpDir
+      FS.rmdirSync tmp
+
+    test "Interaction (hover)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="status">None</div>
+          <div id="target" style="width:10px;height:10px">Target</div>
+          <script>
+            document.getElementById('target').addEventListener('mouseenter', () => 
+              document.getElementById('status').textContent = 'Hovered'
+            );
+          </script>
+        """
+        Mimic.select "#target"
+        Mimic.hover
+        K.drop
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Hovered"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Interaction (focus)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="status">None</div>
+          <input id="target">
+          <script>
+            document.getElementById('target').addEventListener('focus', () => 
+              document.getElementById('status').textContent = 'Focused'
+            );
+          </script>
+        """
+        Mimic.select "#target"
+        Mimic.focus
+        K.drop
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Focused"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Interaction (blur)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="status">None</div>
+          <input id="target">
+          <script>
+            document.getElementById('target').addEventListener('blur', () => 
+              document.getElementById('status').textContent = 'Blurred'
+            );
+          </script>
+        """
+        Mimic.select "#target"
+        Mimic.focus
+        Mimic.blur
+        K.drop
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Blurred"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Interaction (press)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="status">None</div>
+          <script>
+            window.addEventListener('keydown', (e) => 
+              document.getElementById('status').textContent = 'Pressed ' + e.key
+            );
+          </script>
+        """
+        Mimic.press "Enter"
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Pressed Enter"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Interaction (scroll)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div style="height: 2000px">Spacer</div>
+        """
+        Mimic.scroll "bottom"
+        Mimic.evaluate -> window.scrollY > 0
+        K.peek ( scrolled ) -> assert scrolled
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Interaction (submit)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto """data:text/html,
+          <div id="status">None</div>
+          <form id="form" onsubmit="event.preventDefault(); document.getElementById('status').textContent = 'Submitted'">
+            <button type="submit">Submit</button>
+          </form>
+        """
+        Mimic.select "#form"
+        Mimic.submit
+        K.drop
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ( texts ) -> assert.equal texts[0], "Submitted"
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Dialogs (dialog.accept)", ->
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.dialog.accept
+        Mimic.evaluate -> confirm "Are you sure?"
+        K.peek ( result ) -> assert result == true
+      ]
+      [ browser ] = stack
+      await browser.close()
+
+    test "Screenshots (screenshot.image, screenshot.pdf)", ->
+      tmp = Path.join process.cwd(), "test/tmp/screenshots"
+      FS.mkdirSync tmp, recursive: true
+      image = Path.join tmp, "test-screenshot.png"
+      pdf = Path.join tmp, "test-screenshot.pdf"
+      
+      stack = await do pipe [
+        Mimic.browser()
+        Mimic.page
+        Mimic.goto "data:text/html,<h1>Screenshot Test</h1>"
+        Mimic.screenshot.image path: image
+        Mimic.screenshot.pdf path: pdf
+      ]
+      
+      assert FS.existsSync image
+      assert (FS.statSync image).size > 0
+      assert FS.existsSync pdf
+      assert (FS.statSync pdf).size > 0
+      
+      [ browser ] = stack
+      await browser.close()
+      FS.unlinkSync image
+      FS.unlinkSync pdf
+      FS.rmdirSync tmp
 
   ]
 
