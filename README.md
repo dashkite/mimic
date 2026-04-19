@@ -8,6 +8,7 @@ Mimic provides a set of stack-based combinators, powered by Katana, for orchestr
 
 ```coffeescript
 import { pipe } from "@dashkite/joy/function"
+import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
 await do pipe [
@@ -17,7 +18,7 @@ await do pipe [
   Mimic.goto "https://example.com"
   Mimic.select "h1"
   Mimic.text
-  ([ texts ]) -> assert.equal texts[0], "Example Domain"
+  K.peek ([ title ]) -> assert.equal title, "Example Domain"
 ]
 ```
 

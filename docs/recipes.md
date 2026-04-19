@@ -12,25 +12,26 @@ Chain lifecycle and DOM interaction combinators.
 
 ### Example
 ```coffeescript
+import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
 await do pipe [
-  Mimic.start browser
+  Mimic.browser
   Mimic.page
   Mimic.goto "https://example.com"
   Mimic.select "h1"
   Mimic.text
-  ([ rest..., [ heading ] ]) -> assert.equal heading, "Example Domain"
+  K.peek ([ heading ]) -> assert.equal heading, "Example Domain"
 ]
 ```
 
 ### Algorithm
-1.  Start the flow with a browser instance.
+1.  Initialize the browser session.
 2.  Create a new page.
 3.  Navigate to the target URL.
 4.  Use `select` to find the element.
 5.  Use `text` to extract the content.
-6.  Assert the result.
+6.  Assert the result using `K.peek`.
 
 ---
 
@@ -44,8 +45,10 @@ Use the `shadow` combinator to enter the shadow root.
 
 ### Example
 ```coffeescript
+import Mimic from "@dashkite/mimic"
+
 await do pipe [
-  Mimic.start browser
+  Mimic.browser
   Mimic.page
   Mimic.goto "http://localhost:3000"
   Mimic.select "my-custom-element"
@@ -73,8 +76,10 @@ Sequence `select`, `type`, and `submit` operations.
 
 ### Example
 ```coffeescript
+import Mimic from "@dashkite/mimic"
+
 await do pipe [
-  Mimic.start browser
+  Mimic.browser
   Mimic.page
   Mimic.goto "/register"
   Mimic.select "input[name='email']"
@@ -83,7 +88,7 @@ await do pipe [
   Mimic.type "alice"
   Mimic.select "form"
   Mimic.submit
-  Mimic.wait
+  Mimic.wait()
 ]
 ```
 
@@ -94,4 +99,4 @@ await do pipe [
     - Type the value.
 3.  Select the form element.
 4.  Use `submit` to trigger the submission.
-5.  Use `wait` to ensure the next page or state is reached.
+5.  Use `wait()` to ensure the next page or state is reached.
