@@ -81,6 +81,8 @@ Mimic =
   waitFor: ( condition, options = {} ) -> 
     K.peek ( target ) -> _.waitFor target, condition, options
 
+  waitForShadow: K.push ( target ) -> _.waitForShadow target
+
   # Selection & Refinement (Push)
   select: ( selector ) -> K.push ( target ) -> _.select target, selector
   shadow: K.push ( target ) -> _.shadow target

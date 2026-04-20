@@ -1,11 +1,13 @@
 import Generic from "@dashkite/generic"
+import { ElementHandle } from "puppeteer"
+
 export type = Generic.make
   name: "Mimic.type"
   default: ( target ) ->
     throw new Error "type: expected ElementHandle,
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
-type.define [ require("puppeteer").ElementHandle, String ], ( element, text ) ->
+type.define [ ElementHandle, String ], ( element, text ) ->
   await element.focus()
   await element.evaluate ( node ) -> node.value = ""
   element.type text

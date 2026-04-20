@@ -71,6 +71,34 @@ export default ( start ) ->
       ([ browser, context ]) -> context.close()
     ]
 
+    test "waitForShadow", pipe [
+      preamble
+      Mimic.goto """data:text/html,
+        <script>
+          setTimeout(() => {
+            customElements.define('delayed-component', 
+              class extends HTMLElement {
+                constructor() {
+                  super();
+                  this.attachShadow({mode: 'open'})
+                    .innerHTML = '<h1>Late Shadow</h1>';
+                }
+              });
+            document.body.innerHTML = 
+              '<delayed-component></delayed-component>';
+          }, 500);
+        </script>
+      """
+      Mimic.waitFor "delayed-component"
+      Mimic.select "delayed-component"
+      Mimic.waitForShadow
+      Mimic.shadow
+      Mimic.select "h1"
+      Mimic.text
+      K.peek ([ text ]) -> assert.equal text, "Late Shadow"
+      ([ browser, context ]) -> context.close()
+    ]
+
     test "visible", pipe [
       preamble
       Mimic.goto """data:text/html,

@@ -27,5 +27,6 @@ select.define [ JSHandle, String ], ( handle, selector ) ->
   handles
 
 select.define [ Array, String ], ( targets, selector ) ->
-  results = await Promise.all ( targets.map ( target ) -> select target, selector )
+  results = await Promise.all do ->
+    targets.map ( target ) -> select target, selector
   results.flat()
