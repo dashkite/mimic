@@ -156,7 +156,6 @@ export default ( start ) ->
         Mimic.select "#drag-target"
         Mimic.drop
       ]
-      Mimic.sleep 100
       Mimic.select "#status"
       Mimic.text
       K.peek ([ value ]) -> assert.equal value, "Dropped"
