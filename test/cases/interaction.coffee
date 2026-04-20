@@ -14,23 +14,34 @@ export default ( start ) ->
     Mimic.page
     Mimic.goto """data:text/html,
       <div id="status">None</div>
-      <div id="drag-source" style="width:10px;height:10px;background:red">Source</div>
-      <div id="drag-target" style="width:20px;height:20px;background:blue">Target</div>
-      <div id="hover-target" style="width:10px;height:10px">Hover Target</div>
+      <div id="drag-source" 
+        style="width:10px;height:10px;background:red">Source</div>
+      <div id="drag-target" 
+        style="width:20px;height:20px;background:blue">Target</div>
+      <div id="hover-target" 
+        style="width:10px;height:10px">Hover Target</div>
       <input id="input-target">
-      <button id="button-target" onclick="document.getElementById('status').textContent = 'Clicked'">Click</button>
+      <button id="button-target" 
+        onclick="document.getElementById('status').textContent = 'Clicked'">
+        Click
+      </button>
       <div style="height: 2000px">Spacer</div>
-      <form id="form-target" onsubmit="event.preventDefault(); document.getElementById('status').textContent = 'Submitted'">
+      <form id="form-target" 
+        onsubmit="event.preventDefault(); 
+          document.getElementById('status').textContent = 'Submitted'">
         <button type="submit">Submit</button>
       </form>
       <script>
         const status = document.getElementById('status');
         const input = document.getElementById('input-target');
-        document.getElementById('hover-target').addEventListener('mouseenter', () => status.textContent = 'Hovered');
+        document.getElementById('hover-target')
+          .addEventListener('mouseenter', () => status.textContent = 'Hovered');
         input.addEventListener('focus', () => status.textContent = 'Focused');
         input.addEventListener('blur', () => status.textContent = 'Blurred');
-        window.addEventListener('keydown', (e) => status.textContent = 'Pressed ' + e.key);
-        document.getElementById('drag-target').addEventListener('mouseup', () => status.textContent = 'Dropped');
+        window.addEventListener('keydown', 
+          (e) => status.textContent = 'Pressed ' + e.key);
+        document.getElementById('drag-target')
+          .addEventListener('mouseup', () => status.textContent = 'Dropped');
       </script>
     """
   ]
@@ -170,7 +181,8 @@ export default ( start ) ->
           FS.writeFileSync path, "Upload Test Content"
           path
       ]
-      Mimic.evaluate -> document.getElementById('file-input').files[0].name
+      Mimic.evaluate -> 
+        document.getElementById('file-input').files[0].name
       K.peek ( name ) -> 
         assert.equal name, "test-upload.txt"
         tmp = Path.join process.cwd(), "test/tmp/upload"
