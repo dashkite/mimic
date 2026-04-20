@@ -16,7 +16,9 @@ export default ( start ) ->
 
     test "attribute", pipe [
       preamble
-      Mimic.goto 'data:text/html,<div id="test-id" class="test-class"></div>'
+      Mimic.goto """data:text/html,
+        <div id="test-id" class="test-class"></div>
+      """
       tee pipe [
         Mimic.select "#test-id"
         Mimic.attribute "class"
@@ -48,12 +50,14 @@ export default ( start ) ->
       preamble
       Mimic.goto """data:text/html,
         <script>
-          customElements.define('test-component', class extends HTMLElement {
-            constructor() {
-              super();
-              this.attachShadow({mode: 'open'}).innerHTML = '<h1>Shadow Content</h1>';
-            }
-          });
+          customElements.define('test-component',
+            class extends HTMLElement {
+              constructor() {
+                super();
+                this.attachShadow({mode: 'open'}).innerHTML = 
+                  '<h1>Shadow Content</h1>';
+              }
+            });
         </script>
         <test-component></test-component>
       """
@@ -89,7 +93,8 @@ export default ( start ) ->
         <div id="container"></div>
         <script>
           setTimeout(() => {
-            document.getElementById('container').innerHTML = '<div id="late">Late</div>';
+            document.getElementById('container').innerHTML = 
+              '<div id="late">Late</div>';
           }, 500);
         </script>
       """
@@ -99,7 +104,8 @@ export default ( start ) ->
         Mimic.text
         K.peek ([ text ]) -> assert.equal text, "Late"
       ]
-      Mimic.waitFor -> document.getElementById('container').childElementCount == 1
+      Mimic.waitFor -> 
+        document.getElementById('container').childElementCount == 1
       ([ browser, context ]) -> context.close()
     ]
 
@@ -111,7 +117,8 @@ export default ( start ) ->
       tee pipe [
         Mimic.accessibility
         K.peek ( snapshot ) ->
-          button = snapshot.children.find ( node ) -> node.name == "Submit Form"
+          button = snapshot.children.find ( node ) -> 
+            node.name == "Submit Form"
           assert button?
       ]
       ([ browser, context ]) -> context.close()
