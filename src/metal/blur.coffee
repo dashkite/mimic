@@ -9,4 +9,5 @@ export blur = Generic.make
 blur.define [ ElementHandle ], ( element ) ->
   element.evaluate ( node ) -> node.blur()
 
-blur.define [ Array ], ( elements ) -> blur elements[0]
+blur.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> blur element )

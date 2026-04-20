@@ -9,4 +9,5 @@ export focus = Generic.make
 focus.define [ ElementHandle ], ( element ) ->
   element.focus()
 
-focus.define [ Array ], ( elements ) -> focus elements[0]
+focus.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> focus element )

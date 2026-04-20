@@ -25,3 +25,7 @@ select.define [ JSHandle, String ], ( handle, selector ) ->
     if ( element = prop.asElement() )?
       handles.push element
   handles
+
+select.define [ Array, String ], ( targets, selector ) ->
+  results = await Promise.all ( targets.map ( target ) -> select target, selector )
+  results.flat()

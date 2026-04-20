@@ -2,7 +2,7 @@ import FS from "fs"
 import Path from "path"
 import assert from "@dashkite/assert"
 import { test } from "@dashkite/amen"
-import { pipe } from "@dashkite/joy/function"
+import { pipe, tee } from "@dashkite/joy/function"
 import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
@@ -39,61 +39,70 @@ export default ( start ) ->
 
     test "click, type, clear", pipe [
       preamble
-      Mimic.select "#input-target"
-      Mimic.type "Hello Mimic"
-      K.drop
-      Mimic.select "#button-target"
-      Mimic.click
-      K.drop
-      Mimic.select "#status"
-      Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Clicked"
-      K.drop
-      K.drop
-      Mimic.select "#input-target"
-      Mimic.clear
-      Mimic.type "New Text"
-      K.drop
-      Mimic.select "#button-target"
-      Mimic.click
-      K.drop
-      Mimic.select "#status"
-      Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Clicked"
+      tee pipe [
+        Mimic.select "#input-target"
+        Mimic.type "Hello Mimic"
+      ]
+      tee pipe [
+        Mimic.select "#button-target"
+        Mimic.click
+      ]
+      tee pipe [
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ([ value ]) -> assert.equal value, "Clicked"
+      ]
+      tee pipe [
+        Mimic.select "#input-target"
+        Mimic.clear
+        Mimic.type "New Text"
+      ]
+      tee pipe [
+        Mimic.select "#button-target"
+        Mimic.click
+      ]
+      tee pipe [
+        Mimic.select "#status"
+        Mimic.text
+        K.peek ([ value ]) -> assert.equal value, "Clicked"
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
     test "hover", pipe [
       preamble
-      Mimic.select "#hover-target"
-      Mimic.hover
-      K.drop
+      tee pipe [
+        Mimic.select "#hover-target"
+        Mimic.hover
+      ]
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Hovered"
+      K.peek ([ value ]) -> assert.equal value, "Hovered"
       ([ browser, context ]) -> context.close()
     ]
 
     test "focus", pipe [
       preamble
-      Mimic.select "#input-target"
-      Mimic.focus
-      K.drop
+      tee pipe [
+        Mimic.select "#input-target"
+        Mimic.focus
+      ]
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Focused"
+      K.peek ([ value ]) -> assert.equal value, "Focused"
       ([ browser, context ]) -> context.close()
     ]
 
     test "blur", pipe [
       preamble
-      Mimic.select "#input-target"
-      Mimic.focus
-      Mimic.blur
-      K.drop
+      tee pipe [
+        Mimic.select "#input-target"
+        Mimic.focus
+        Mimic.blur
+      ]
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Blurred"
+      K.peek ([ value ]) -> assert.equal value, "Blurred"
       ([ browser, context ]) -> context.close()
     ]
 
@@ -102,7 +111,7 @@ export default ( start ) ->
       Mimic.press "Enter"
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Pressed Enter"
+      K.peek ([ value ]) -> assert.equal value, "Pressed Enter"
       ([ browser, context ]) -> context.close()
     ]
 
@@ -116,46 +125,51 @@ export default ( start ) ->
 
     test "submit", pipe [
       preamble
-      Mimic.select "#form-target"
-      Mimic.submit
-      K.drop
+      tee pipe [
+        Mimic.select "#form-target"
+        Mimic.submit
+      ]
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Submitted"
+      K.peek ([ value ]) -> assert.equal value, "Submitted"
       ([ browser, context ]) -> context.close()
     ]
 
     test "drag, drop", pipe [
       preamble
-      Mimic.select "#drag-source"
-      Mimic.drag
-      K.drop
-      Mimic.select "#drag-target"
-      Mimic.drop
-      K.drop
+      tee pipe [
+        Mimic.select "#drag-source"
+        Mimic.drag
+      ]
+      tee pipe [
+        Mimic.select "#drag-target"
+        Mimic.drop
+      ]
       Mimic.sleep 100
       Mimic.select "#status"
       Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Dropped"
+      K.peek ([ value ]) -> assert.equal value, "Dropped"
       ([ browser, context ]) -> context.close()
     ]
 
     test "upload", pipe [
       preamble
-      Mimic.evaluate -> 
-        input = document.createElement 'input'
-        input.type = 'file'
-        input.id = 'file-input'
-        document.body.appendChild input
-      K.drop
-      Mimic.select "#file-input"
-      Mimic.upload do ->
-        tmp = Path.join process.cwd(), "test/tmp/upload"
-        FS.mkdirSync tmp, recursive: true
-        path = Path.join tmp, "test-upload.txt"
-        FS.writeFileSync path, "Upload Test Content"
-        path
-      K.drop
+      tee pipe [
+        Mimic.evaluate -> 
+          input = document.createElement 'input'
+          input.type = 'file'
+          input.id = 'file-input'
+          document.body.appendChild input
+      ]
+      tee pipe [
+        Mimic.select "#file-input"
+        Mimic.upload do ->
+          tmp = Path.join process.cwd(), "test/tmp/upload"
+          FS.mkdirSync tmp, recursive: true
+          path = Path.join tmp, "test-upload.txt"
+          FS.writeFileSync path, "Upload Test Content"
+          path
+      ]
       Mimic.evaluate -> document.getElementById('file-input').files[0].name
       K.peek ( name ) -> 
         assert.equal name, "test-upload.txt"

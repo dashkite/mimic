@@ -9,4 +9,5 @@ export hover = Generic.make
 hover.define [ ElementHandle ], ( element ) ->
   element.hover()
 
-hover.define [ Array ], ( elements ) -> hover elements[0]
+hover.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> hover element )

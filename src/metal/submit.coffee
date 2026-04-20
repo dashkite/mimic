@@ -17,4 +17,5 @@ submit.define [ ElementHandle ], ( element ) ->
       else
         node.submit()
 
-submit.define [ Array ], ( elements ) -> submit elements[0]
+submit.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> submit element )

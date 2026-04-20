@@ -9,4 +9,5 @@ export clear = Generic.make
 clear.define [ ElementHandle ], ( element ) ->
   element.evaluate ( node ) -> node.value = ""
 
-clear.define [ Array ], ( elements ) -> clear elements[0]
+clear.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> clear element )

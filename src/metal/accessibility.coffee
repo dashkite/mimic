@@ -8,3 +8,6 @@ export accessibility = Generic.make
 
 accessibility.define [ isPage ], ( page ) ->
   page.accessibility.snapshot()
+
+accessibility.define [ Array ], ( items ) ->
+  Promise.all ( items.map ( item ) -> accessibility item )

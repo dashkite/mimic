@@ -10,3 +10,6 @@ export scroll = Generic.make
 scroll.define [ isPage, String ], ( page, position ) ->
   if position == "bottom"
     page.evaluate -> window.scrollTo 0, document.body.scrollHeight
+
+scroll.define [ Array, String ], ( items, position ) ->
+  Promise.all ( items.map ( item ) -> scroll item, position )

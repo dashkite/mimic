@@ -13,4 +13,5 @@ drop.define [ ElementHandle ], ( element ) ->
   await element.frame.page().mouse.move x, y
   element.frame.page().mouse.up()
 
-drop.define [ Array ], ( elements ) -> drop elements[0]
+drop.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> drop element )

@@ -1,6 +1,6 @@
 import assert from "@dashkite/assert"
 import { test } from "@dashkite/amen"
-import { pipe } from "@dashkite/joy/function"
+import { pipe, tee } from "@dashkite/joy/function"
 import * as K from "@dashkite/katana"
 import Mimic from "@dashkite/mimic"
 
@@ -17,24 +17,30 @@ export default ( start ) ->
     test "attribute", pipe [
       preamble
       Mimic.goto 'data:text/html,<div id="test-id" class="test-class"></div>'
-      Mimic.select "#test-id"
-      Mimic.attribute "class"
-      K.peek ( value ) -> assert.equal value, "test-class"
+      tee pipe [
+        Mimic.select "#test-id"
+        Mimic.attribute "class"
+        K.peek ([ value ]) -> assert.equal value, "test-class"
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
     test "evaluate", pipe [
       preamble
-      Mimic.evaluate -> 1 + 1
-      K.peek ( result ) -> assert.equal result, 2
+      tee pipe [
+        Mimic.evaluate -> 1 + 1
+        K.peek ( result ) -> assert.equal result, 2
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
     test "content", pipe [
       preamble
       Mimic.goto "data:text/html,<span>Test</span>"
-      Mimic.content
-      K.peek ( html ) -> assert html.includes "<span>Test</span>"
+      tee pipe [
+        Mimic.content
+        K.peek ( html ) -> assert html.includes "<span>Test</span>"
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
@@ -51,11 +57,13 @@ export default ( start ) ->
         </script>
         <test-component></test-component>
       """
-      Mimic.select "test-component"
-      Mimic.shadow
-      Mimic.select "h1"
-      Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Shadow Content"
+      tee pipe [
+        Mimic.select "test-component"
+        Mimic.shadow
+        Mimic.select "h1"
+        Mimic.text
+        K.peek ([ title ]) -> assert.equal title, "Shadow Content"
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
@@ -65,12 +73,13 @@ export default ( start ) ->
         <div class="item">Visible</div>
         <div class="item" style="display:none">Hidden</div>
       """
-      Mimic.select ".item"
-      Mimic.visible
-      Mimic.text
-      K.peek ( texts ) ->
-        assert.equal texts.length, 1
-        assert.equal texts[0], "Visible"
+      tee pipe [
+        Mimic.select ".item"
+        Mimic.visible
+        Mimic.text
+        K.peek ([ text ]) ->
+          assert.equal text, "Visible"
+      ]
       ([ browser, context ]) -> context.close()
     ]
 
@@ -84,12 +93,12 @@ export default ( start ) ->
           }, 500);
         </script>
       """
-      Mimic.waitFor "#late"
-      Mimic.select "#late"
-      Mimic.text
-      K.peek ( texts ) -> assert.equal texts[0], "Late"
-      K.drop
-      K.drop
+      tee pipe [
+        Mimic.waitFor "#late"
+        Mimic.select "#late"
+        Mimic.text
+        K.peek ([ text ]) -> assert.equal text, "Late"
+      ]
       Mimic.waitFor -> document.getElementById('container').childElementCount == 1
       ([ browser, context ]) -> context.close()
     ]
@@ -99,10 +108,12 @@ export default ( start ) ->
       Mimic.goto """data:text/html,
         <button aria-label="Submit Form">Button</button>
       """
-      Mimic.accessibility
-      K.peek ( snapshot ) ->
-        button = snapshot.children.find ( node ) -> node.name == "Submit Form"
-        assert button?
+      tee pipe [
+        Mimic.accessibility
+        K.peek ( snapshot ) ->
+          button = snapshot.children.find ( node ) -> node.name == "Submit Form"
+          assert button?
+      ]
       ([ browser, context ]) -> context.close()
     ]
 

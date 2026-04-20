@@ -9,4 +9,4 @@ attribute.define [ require("puppeteer").ElementHandle, String ], ( element, name
   element.evaluate ( ( node, name ) -> node.getAttribute name ), name
 
 attribute.define [ Array, String ], ( elements, name ) ->
-  attribute elements[0], name
+  Promise.all ( elements.map ( element ) -> attribute element, name )

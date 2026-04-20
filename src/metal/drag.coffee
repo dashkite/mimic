@@ -13,4 +13,5 @@ drag.define [ ElementHandle ], ( element ) ->
   await element.frame.page().mouse.move x, y
   element.frame.page().mouse.down()
 
-drag.define [ Array ], ( elements ) -> drag elements[0]
+drag.define [ Array ], ( elements ) ->
+  Promise.all ( elements.map ( element ) -> drag element )

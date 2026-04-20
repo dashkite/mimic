@@ -12,3 +12,6 @@ evaluate.define [ isPage, Function ], ( page, f ) ->
 
 evaluate.define [ JSHandle, Function ], ( handle, f ) -> 
   handle.evaluate f
+
+evaluate.define [ Array, Function ], ( items, f ) ->
+  Promise.all ( items.map ( item ) -> evaluate item, f )

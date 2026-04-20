@@ -10,4 +10,4 @@ upload.define [ ElementHandle, Array ], ( element, paths ) ->
   element.uploadFile ...paths
 
 upload.define [ Array, Array ], ( elements, paths ) ->
-  upload elements[0], paths
+  Promise.all ( elements.map ( element ) -> upload element, paths )

@@ -8,3 +8,6 @@ export viewport = Generic.make
 
 viewport.define [ isPage, Object ], ( page, options ) ->
   page.setViewport options
+
+viewport.define [ Array, Object ], ( items, options ) ->
+  Promise.all ( items.map ( item ) -> viewport item, options )

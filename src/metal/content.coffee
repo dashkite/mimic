@@ -8,3 +8,6 @@ export content = Generic.make
 
 content.define [ isPage ], ( page ) ->
   page.content()
+
+content.define [ Array ], ( items ) ->
+  Promise.all ( items.map ( item ) -> content item )

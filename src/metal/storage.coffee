@@ -11,3 +11,6 @@ storage.clear.define [ isPage ], ( page ) ->
   page.evaluate ->
     localStorage.clear()
     sessionStorage.clear()
+
+storage.clear.define [ Array ], ( items ) ->
+  Promise.all ( items.map ( item ) -> storage.clear item )

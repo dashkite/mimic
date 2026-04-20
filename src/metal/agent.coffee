@@ -9,3 +9,6 @@ export agent = Generic.make
 
 agent.define [ isPage, String ], ( page, agent ) ->
   page.setUserAgent agent
+
+agent.define [ Array, String ], ( items, value ) ->
+  Promise.all ( items.map ( item ) -> agent item, value )
