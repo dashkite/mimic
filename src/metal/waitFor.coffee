@@ -7,12 +7,12 @@ export waitFor = Generic.make
       but received [ #{ target?.constructor?.name ? typeof target } ]."
 
 waitFor.define [ isTarget, String, Object ], ( target, selector, options ) ->
-  options.timeout ?= 10000
+  options.timeout ?= 1000
   target.waitForSelector selector, options
 
 waitFor.define [ isTarget, Function, Object ],
   ( target, condition, options ) ->
-    options.timeout ?= 10000
+    options.timeout ?= 1000
     target.waitForFunction condition, options
 
 waitFor.define [ Array, String, Object ], ( items, selector, options ) ->

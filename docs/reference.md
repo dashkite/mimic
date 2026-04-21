@@ -189,6 +189,18 @@ $sleep: ms \dashrightarrow \varnothing$
 
 Sleeps for the specified duration.
 
+## Reporting
+
+#### report.console
+$report.console: message \dashrightarrow \varnothing$
+
+A visually rich formatter for browser `console` events. It parses CDP `%c` formatting, applies color coding based on message type (log, warning, error), and prefixes output with a color-coded `[ browser ]` prompt. Designed to be used with the `console` combinator.
+
+#### report.error
+$report.error: error \dashrightarrow \varnothing$
+
+A visually rich formatter for browser `pageerror` events. It styles the error message in red and prefixes it with a red `[ browser ]` prompt. Designed to be used with the `error` combinator.
+
 ## DOM Interaction
 
 #### select

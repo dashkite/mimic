@@ -25,6 +25,7 @@ await do pipe [
 ### Features
 - **Stack-Based Composition**: Leverage Katana to build readable browser interaction pipelines.
 - **Web Component Support**: Built-in support for Shadow DOM traversal and waiting for custom element definitions.
+- **Reporting**: Visually rich, color-coded terminal reporting for browser console and page errors.
 - **Declarative API**: Unified interface for navigation, selection, inspection, and interaction.
 - **Puppeteer Powered**: Reliability and performance of the industry-standard headless browser library.
 
@@ -61,6 +62,15 @@ await do pipe [
   Mimic.emulate "iphone/15"
   Mimic.goto "https://example.com"
   Mimic.screenshot.image path: "iphone-example.png"
+]
+
+# Example: Reporting browser output
+await do pipe [
+  Mimic.browser
+  Mimic.page
+  Mimic.console Mimic.report.console
+  Mimic.error Mimic.report.error
+  Mimic.goto "https://example.com"
 ]
 ```
 

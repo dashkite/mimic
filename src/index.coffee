@@ -1,12 +1,27 @@
 import * as K from "@dashkite/katana"
 import * as Time from "@dashkite/joy/time"
 import puppeteer from "puppeteer"
+import chalk from "chalk"
 import * as _ from "./metal"
 import Agents from "./agents"
 
 # -- Helpers --
 
 resolve = ( shorthand ) -> Agents[shorthand] ? shorthand
+
+format = ( text ) ->
+  match = text.match /^%c(.*?)\s+color:\s*([^;]+);?\s*$/
+  if match
+    [ placeholder, content, color ] = match
+    color = color.trim()
+    if color.startsWith "#"
+      return chalk.hex(color)(content)
+    else
+      try
+        return chalk.keyword(color)(content)
+      catch
+        return content
+  return text
 
 # -- Public API --
 
@@ -115,5 +130,36 @@ Mimic =
   screenshot:
     image: ( options = {} ) -> K.peek ( target ) -> _.screenshot.image target, options
     pdf: ( options = {} ) -> K.peek ( page ) -> _.screenshot.pdf page, options
+
+  # Reporting
+  report:
+    console: ( message ) ->
+      type = message.type()
+      text = message.text()
+      formatted = format text
+      isFormatted = formatted != text
+
+      [ prompt, content ] = switch type
+        when "error"
+          [
+            chalk.bgRed.white(" browser ")
+            chalk.red "error: #{formatted}"
+          ]
+        when "warning"
+          [
+            chalk.bgHex("#FFBF00").black(" browser ")
+            chalk.hex("#FFBF00") "warning: #{formatted}"
+          ]
+        else
+          [
+            chalk.bgGreen.black(" browser ")
+            if isFormatted then formatted else chalk.green formatted
+          ]
+
+      console.log "#{prompt} #{content}"
+
+    error: ( error ) ->
+      prompt = chalk.bgRed.white(" browser ")
+      console.error "#{prompt} #{chalk.red "error: #{error.message}"}"
 
 export default Mimic
