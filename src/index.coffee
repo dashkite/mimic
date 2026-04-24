@@ -143,17 +143,17 @@ Mimic =
         when "error"
           [
             chalk.bgRed.white(" browser ")
-            chalk.red "error: #{formatted}"
+            chalk.red "❌ #{formatted}"
           ]
         when "warning"
           [
             chalk.bgHex("#FFBF00").black(" browser ")
-            chalk.hex("#FFBF00") "warning: #{formatted}"
+            chalk.hex("#FFBF00") "⚠️ #{formatted}"
           ]
         else
           [
-            chalk.bgGreen.black(" browser ")
-            if isFormatted then formatted else chalk.green formatted
+            chalk.bgHex("#006611").white(" browser ")
+            if isFormatted then formatted else formatted
           ]
 
       console.log "#{prompt} #{content}"
