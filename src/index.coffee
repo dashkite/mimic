@@ -158,8 +158,10 @@ Mimic =
 
       console.log "#{prompt} #{content}"
 
-    error: ( error ) ->
-      prompt = chalk.bgRed.white(" browser ")
-      console.error "#{prompt} #{chalk.red "error: #{error.message}"}"
+    error: ( debug = false ) ->
+      ( error ) ->
+        prompt = chalk.bgRed.white(" browser ")
+        message = if debug then (error.stack ? error.message) else error.message
+        console.error "#{prompt} #{chalk.red "error: #{message}"}"
 
 export default Mimic
