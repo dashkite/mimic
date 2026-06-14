@@ -34,14 +34,14 @@
     "@dashkite/genie": "0.20.14",
     "@dashkite/genie-clean": "0.9.0",
     "@dashkite/genie-coffee": "0.9.0",
-    "@dashkite/genie-module": "link:../genie-module",
+    "@dashkite/genie-module": "^0.5.60",
     "@dashkite/genie-release": "^0.5.16",
     "@dashkite/genie-yaml": "0.11.13"
   },
   "dependencies": {
     "@dashkite/generic": "0.9.19",
     "@dashkite/joy": "0.12.40",
-    "@dashkite/katana": "link:../katana",
+    "@dashkite/katana": "^0.4.18",
     "chalk": "4.1.2",
     "puppeteer": "24.41.0"
   }
